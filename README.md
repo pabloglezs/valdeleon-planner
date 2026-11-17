@@ -1,6 +1,6 @@
 # Valdeleón Planner
 
-Plano interactivo para decorar un chalet esquinero de Residencial Valdeleón (Valdefresno, León): muebles a escala sobre los muros del plano de venta, vista 3D con modo "caminar", botón para invertir la casa (los esquineros existen en las dos orientaciones) y catálogo de casi 200 muebles, con tecnología, iluminación y decoración.
+Plano interactivo para decorar un chalet esquinero de Residencial Valdeleón (Valdefresno, León): muebles a escala sobre los muros del plano de venta, vista 3D con modo "caminar", botón para invertir la casa (los esquineros existen en las dos orientaciones) y catálogo de casi 200 muebles, con tecnología, iluminación y decoración. En 3D se pueden bajar u ocultar los muros (recorte al estilo Sims, bajos u ocultos) para ver el interior.
 
 Es una página estática (`index.html`) servida por nginx. Los muros van incrustados en el propio HTML; el navegador del visitante necesita internet para cargar three.js (cdnjs y jsDelivr) y la tipografía (Google Fonts). Los muebles que mueve cada persona se guardan en su navegador, no en el servidor.
 
