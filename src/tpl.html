@@ -120,6 +120,13 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 .issues li.ok{color:var(--ink2)}
 .note{font-size:12px;color:var(--ink2);margin:0}
 
+/* edición de muros */
+.selbtn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;color:var(--ink)}
+svg.tool-on{cursor:crosshair}
+svg.tool-on .item{pointer-events:none}
+.wprev{fill:color-mix(in srgb,var(--bad) 20%,transparent);stroke:var(--bad);stroke-width:2;stroke-dasharray:7 5;pointer-events:none}
+.wprev.add{fill:color-mix(in srgb,var(--accent) 35%,transparent);stroke:var(--accent)}
+.wprevt{font-family:var(--mono);font-size:13px;fill:var(--ink);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--surface);stroke-width:4px}
 /* vista 3D */
 .walkopts{display:inline-flex;gap:12px;align-items:center;flex-wrap:wrap}
 .walkopts label{display:inline-flex;gap:6px;align-items:center}
@@ -215,6 +222,18 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
           <button class="btn" id="tgrid" aria-pressed="true" title="Una cuadrícula equivale a 1 m">Rejilla 1 m</button>
           <button class="btn" id="tdims" aria-pressed="false" title="Muestra las medidas de todos los muebles">Medidas</button>
         </div>
+      </div>
+      <div class="tools" id="wtools">
+        <span class="hint">Muros:</span>
+        <button class="btn" data-tool="sel" aria-pressed="true">Muebles</button>
+        <button class="btn" data-tool="cut" aria-pressed="false" title="Arrastra un rectángulo sobre el trozo de muro que quieras quitar">Tirar muro</button>
+        <button class="btn" data-tool="add" aria-pressed="false" title="Arrastra para dibujar un muro nuevo">Construir muro</button>
+        <select id="wthk" class="selbtn" aria-label="Grosor del muro nuevo">
+          <option value="10">Tabique 10 cm</option><option value="15" selected>Tabique 15 cm</option><option value="25">Muro 25 cm</option><option value="30">Muro 30 cm</option>
+        </select>
+        <button class="btn" id="wundo" title="Deshace el último cambio de muros de esta planta">Deshacer</button>
+        <button class="btn danger" id="wreset" title="Vuelve a los muros del plano en esta planta">Restaurar muros</button>
+        <span class="hint" id="wnote"></span>
       </div>
       <p class="hint" id="hint2d">Arrastra para mover · <kbd>R</kbd> gira 90° · <kbd>F</kbd> voltea ·<kbd>Supr</kbd> elimina · flechas mueven 5 cm · <kbd>Ctrl</kbd>+<kbd>D</kbd> duplica</p>
       <div class="canvas" id="canvas"><svg id="svg" role="img" aria-label="Plano de la planta seleccionada con muebles"></svg></div>
@@ -348,7 +367,7 @@ var DEFAULT=__LAYOUT__;
 
 /* ---------- estado ---------- */
 var KEY='chalet98.plano.v1';
-var S={view:'2d',mirror:false,floor:'baja',items:[],sel:null,snap:true,grid:true,dims:false,ppm:0,manualZoom:false,nid:1};
+var S={view:'2d',mirror:false,tool:'sel',thk:15,wprev:'',edits:{sotano:[],baja:[],primera:[]},floor:'baja',items:[],sel:null,snap:true,grid:true,dims:false,ppm:0,manualZoom:false,nid:1};
 function uid(){return S.nid++;}
 function itemFromDefault(d){
   var T=TYPES[d[1]],it={id:uid(),f:d[0],t:d[1],x:Math.round(d[2]*100),y:Math.round(d[3]*100),r:d[4],w:T.w,h:T.h};
@@ -363,13 +382,13 @@ function load(){
     S.items=j.items.filter(function(i){return TYPES[i.t]&&FLOORS[i.f];});
     S.nid=S.items.reduce(function(m,i){return Math.max(m,i.id);},0)+1;
     if(j.floor&&FLOORS[j.floor]) S.floor=j.floor;
-    S.snap=j.snap!==false; S.grid=j.grid!==false; S.dims=!!j.dims; S.mirror=!!j.mirror; return true;
+    S.snap=j.snap!==false; S.grid=j.grid!==false; S.dims=!!j.dims; S.mirror=!!j.mirror; if(j.edits&&j.edits.baja) S.edits=j.edits; return true;
   }catch(e){return false;}
 }
 var saveT;
 function save(){
   clearTimeout(saveT);
-  saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify({items:S.items,floor:S.floor,snap:S.snap,grid:S.grid,dims:S.dims,mirror:S.mirror}));}catch(e){}},250);
+  saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify({items:S.items,floor:S.floor,snap:S.snap,grid:S.grid,dims:S.dims,mirror:S.mirror,edits:S.edits}));}catch(e){}},250);
 }
 
 /* ---------- utilidades ---------- */
@@ -401,7 +420,7 @@ Object.keys(MASKS).forEach(function(f){
       var x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(im,0,0);
       var d=x.getImageData(0,0,c.width,c.height).data, a=new Uint8Array(c.width*c.height);
       for(var i=0;i<a.length;i++) a[i]=d[i*4+3];
-      WALL[f]={a:a,w:c.width,h:c.height}; refresh(); if(after3D) after3D();
+      WALL[f]={a:a,b0:a.slice(),w:c.width,h:c.height}; applyEdits(f); if(after3D) after3D();
     }catch(e){}
   };
   im.src=MASKS[f];
@@ -531,13 +550,13 @@ function overlayFor(it){
 /* ---------- plano estático de cada planta ---------- */
 var staticCache={};
 function staticSVG(f){
-  var key=f+(S.mirror?'m':'');
+  var key=f+(S.mirror?'m':'')+(WV[f]||0);
   if(staticCache[key]) return staticCache[key];
   var F=FLOORS[f],W=F.w*100,H=F.h*100,mir=S.mirror,s='',a='',b='',t='';
   var mx=function(x){return mir?F.w-x:x;};
   var wrap=function(x){return mir?'<g transform="translate('+W+' 0) scale(-1 1)">'+x+'</g>':x;};
   s+='<defs><pattern id="g1" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0H0V100" fill="none" stroke="var(--grid)" stroke-width="1.2"/></pattern>'+
-     '<mask id="m-'+f+'" maskUnits="userSpaceOnUse" x="0" y="0" width="'+W+'" height="'+H+'" style="mask-type:alpha"><image href="'+MASKS[f]+'" x="0" y="0" width="'+W+'" height="'+H+'"/></mask></defs>';
+     '<mask id="m-'+f+'" maskUnits="userSpaceOnUse" x="0" y="0" width="'+W+'" height="'+H+'" style="mask-type:alpha"><image href="'+(WURL[f]||MASKS[f])+'" x="0" y="0" width="'+W+'" height="'+H+'"/></mask></defs>';
   if(F.lot) a+='<rect class="lot" x="'+F.lot[0]*100+'" y="'+F.lot[1]*100+'" width="'+F.lot[2]*100+'" height="'+F.lot[3]*100+'"/>';
   a+='<rect class="floorfill" x="'+F.house[0]*100+'" y="'+F.house[1]*100+'" width="'+F.house[2]*100+'" height="'+F.house[3]*100+'"/>';
   (F.stairs||[]).forEach(function(st){
@@ -569,7 +588,7 @@ function refresh(){
   svg.classList.toggle('nogrid',!S.grid);
   var an=analyze(), list=cur(), rugs=list.filter(function(i){return TYPES[i.t].k==='rug';}), rest=list.filter(function(i){return TYPES[i.t].k!=='rug';});
   itemsG.innerHTML=rugs.concat(rest).map(function(i){return itemSVG(i,an.bad[i.id]);}).join('');
-  var sel=S.sel&&byId(S.sel); ovG.innerHTML=(sel&&sel.f===S.floor)?overlayFor(sel):'';
+  var sel=S.sel&&byId(S.sel); ovG.innerHTML=((sel&&sel.f===S.floor)?overlayFor(sel):'')+(S.wprev||'');
   if(S.dims){
     ovG.innerHTML+=rest.filter(function(i){return i.id!==S.sel;}).map(function(i){var B=bbox(i);return '<text class="dim" style="fill:var(--ink2)" x="'+i.x+'" y="'+(i.y+B.h/2+13)+'">'+i.w+'×'+i.h+'</text>';}).join('');
   }
@@ -618,6 +637,7 @@ function toCm(e){var r=svg.getBoundingClientRect(),F=FLOORS[S.floor];return {x:(
 function clampIt(it){var F=FLOORS[it.f],B=bbox(it);it.x=Math.max(B.w/2,Math.min(F.w*100-B.w/2,it.x));it.y=Math.max(B.h/2,Math.min(F.h*100-B.h/2,it.y));}
 var drag=null;
 svg.addEventListener('pointerdown',function(e){
+  if(S.tool!=='sel'){wallDown(e);return;}
   var g=e.target.closest&&e.target.closest('.item');
   if(!g){ if(S.sel){S.sel=null;refresh();} return; }
   var it=byId(+g.getAttribute('data-id')); if(!it) return;
@@ -627,13 +647,88 @@ svg.addEventListener('pointerdown',function(e){
   refresh();
 });
 svg.addEventListener('pointermove',function(e){
+  if(wdrag){wallMove(e);return;}
   if(!drag) return;
   if(!drag.moved&&Math.abs(e.clientX-drag.sx)+Math.abs(e.clientY-drag.sy)<4) return;
   drag.moved=true;
   var it=byId(drag.id),p=toCm(e); it.x=snap(p.x-drag.dx); it.y=snap(p.y-drag.dy); clampIt(it); refresh();
 });
-function endDrag(){drag=null;}
-svg.addEventListener('pointerup',endDrag); svg.addEventListener('pointercancel',endDrag);
+function endDrag(e){if(wdrag){wallUp(e);return;} drag=null;}
+svg.addEventListener('pointerup',endDrag); svg.addEventListener('pointercancel',function(){wdrag=null;S.wprev='';drag=null;ovRefresh();});
+
+/* ---------- tirar y construir muros (cada cambio se guarda en cm del plano original, sin espejo) ---------- */
+var WV={},WURL={},wdrag=null,HINT0=$('#hint2d').innerHTML;
+function maskURL(a,W,H){
+  try{var c=document.createElement('canvas');c.width=W;c.height=H;var x=c.getContext('2d'),id=x.createImageData(W,H),d=id.data;for(var i=0;i<a.length;i++)d[i*4+3]=a[i];x.putImageData(id,0,0);return c.toDataURL('image/png');}catch(e){return null;}
+}
+function applyEdits(f){
+  var m=WALL[f]; if(!m) return;
+  var a=m.b0.slice(),W=m.w,H=m.h,ppc=W/(FLOORS[f].w*100),list=S.edits[f]||[];
+  list.forEach(function(e){
+    var x0=Math.max(0,Math.floor(e.x0*ppc)),x1=Math.min(W,Math.ceil(e.x1*ppc)),y0=Math.max(0,Math.floor(e.y0*ppc)),y1=Math.min(H,Math.ceil(e.y1*ppc)),v=e.op==='add'?255:0;
+    for(var y=y0;y<y1;y++) for(var x=x0;x<x1;x++) a[y*W+x]=v;
+  });
+  m.a=a; delete wallCache[f]; WV[f]=(WV[f]||0)+1; WURL[f]=list.length?maskURL(a,W,H):null;
+  if(S.view==='2d'&&S.floor===f&&itemsG) buildSVG(); else if(itemsG) refresh();
+}
+function wallNear(f,xm,ym,r){
+  var m=WALL[f]; if(!m) return true; var ppm=m.w/FLOORS[f].w;
+  for(var dx=-r;dx<=r+.001;dx+=.05) for(var dy=-r;dy<=r+.001;dy+=.05){
+    var px=Math.floor((xm+dx)*ppm),py=Math.floor((ym+dy)*ppm);
+    if(px>=0&&py>=0&&px<m.w&&py<m.h&&m.a[py*m.w+px]>128) return true;
+  }
+  return false;
+}
+/* una ventana o puerta solo se dibuja si el muro sigue a ambos lados del hueco y el hueco sigue libre */
+function openingOK(f,ax,c,w,p){
+  if(!(S.edits[f]&&S.edits[f].length)) return true;
+  var e=w/2+.1,A=ax==='x'?[c-e,p]:[p,c-e],B=ax==='x'?[c+e,p]:[p,c+e],M=ax==='x'?[c,p]:[p,c];
+  return wallNear(f,A[0],A[1],.2)&&wallNear(f,B[0],B[1],.2)&&!wallNear(f,M[0],M[1],.06);
+}
+function snapc(v){return S.snap?Math.round(v/5)*5:Math.round(v);}
+function ovRefresh(){var sel=S.sel&&byId(S.sel);ovG.innerHTML=((sel&&sel.f===S.floor)?overlayFor(sel):'')+(S.wprev||'');}
+function wallRectView(){
+  var d=wdrag;
+  if(S.tool==='cut') return [Math.min(d.x,d.ex),Math.min(d.y,d.ey),Math.max(d.x,d.ex),Math.max(d.y,d.ey)];
+  var h=S.thk/2;
+  if(Math.abs(d.ex-d.x)>=Math.abs(d.ey-d.y)) return [Math.min(d.x,d.ex)-h,d.y-h,Math.max(d.x,d.ex)+h,d.y+h];
+  return [d.x-h,Math.min(d.y,d.ey)-h,d.x+h,Math.max(d.y,d.ey)+h];
+}
+function wallPreview(){
+  var r=wdrag?wallRectView():null; if(!r){S.wprev='';ovRefresh();return;}
+  var w=r[2]-r[0],h=r[3]-r[1],cut=S.tool==='cut',txt=cut?fmt(w)+' × '+fmt(h)+' m':fmt(Math.max(w,h)-(cut?0:S.thk))+' m';
+  S.wprev='<rect class="wprev '+(cut?'':'add')+'" x="'+r[0]+'" y="'+r[1]+'" width="'+w+'" height="'+h+'"/><text class="wprevt" x="'+(r[0]+w/2)+'" y="'+(r[1]-8)+'">'+txt+'</text>';
+  ovRefresh();
+}
+function wallDown(e){
+  var p=toCm(e); wdrag={x:snapc(p.x),y:snapc(p.y),ex:snapc(p.x),ey:snapc(p.y)};
+  try{svg.setPointerCapture(e.pointerId);}catch(_){}
+  wallPreview();
+}
+function wallMove(e){var p=toCm(e);wdrag.ex=snapc(p.x);wdrag.ey=snapc(p.y);wallPreview();}
+function wallUp(){
+  var r=wallRectView(),F=FLOORS[S.floor],W=F.w*100,H=F.h*100; wdrag=null; S.wprev=''; ovRefresh();
+  var big=S.tool==='cut'?(r[2]-r[0]>=10&&r[3]-r[1]>=10):(Math.max(r[2]-r[0],r[3]-r[1])>=S.thk+20);
+  if(!big) return;
+  var x0=Math.max(0,r[0]),x1=Math.min(W,r[2]),y0=Math.max(0,r[1]),y1=Math.min(H,r[3]);
+  if(S.mirror){var t=x0;x0=W-x1;x1=W-t;}
+  S.edits[S.floor].push({op:S.tool==='cut'?'cut':'add',x0:x0,y0:y0,x1:x1,y1:y1});
+  applyEdits(S.floor); save();
+}
+function setTool(t){
+  S.tool=t; wdrag=null; S.wprev='';
+  document.querySelectorAll('[data-tool]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-tool')===t);});
+  svg.classList.toggle('tool-on',t!=='sel');
+  $('#hint2d').innerHTML=t==='cut'?'Arrastra un rectángulo sobre el trozo de muro que quieras tirar · <kbd>Esc</kbd> vuelve a los muebles'
+    :t==='add'?'Arrastra para dibujar un muro nuevo, horizontal o vertical, con el grosor elegido · <kbd>Esc</kbd> vuelve a los muebles':HINT0;
+  $('#wnote').textContent=t==='sel'?'':'Ojo: no tires muros portantes ni medianeras sin consultar a un técnico.';
+  ovRefresh();
+}
+document.querySelectorAll('[data-tool]').forEach(function(b){b.addEventListener('click',function(){setTool(b.getAttribute('data-tool'));});});
+$('#wthk').addEventListener('change',function(){S.thk=+this.value;});
+$('#wundo').addEventListener('click',function(){if(S.edits[S.floor].length){S.edits[S.floor].pop();applyEdits(S.floor);save();}});
+$('#wreset').addEventListener('click',function(){if(S.edits[S.floor].length){S.edits[S.floor]=[];applyEdits(S.floor);save();}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&S.tool!=='sel'&&S.view==='2d')setTool('sel');});
 
 function rotate(it){it.r=(it.r+90)%360;clampIt(it);}
 /* voltear de izquierda a derecha tal como se ve en pantalla: espejo local y giro opuesto */
@@ -1127,6 +1222,7 @@ var LOWW=.5;
 function openings3D(g,f,F,P,W,hcw){
   (OPEN[f]||[]).forEach(function(o){
     var ax=o[0],c=o[1],w=o[2],p=o[3],t=o[4],k=o[5],grp=new THREE.Group();
+    if(!openingOK(f,ax,c,w,p)) return;
     if(S.mirror){if(ax==='x')c=F.w-c; else p=F.w-p;}
     var cc=ax==='x'?F.house[1]+F.house[3]/2:mxF(F,F.house[0]+F.house[2]/2),out=p>cc?1:-1;
     var b2=function(len,h,th,u,y,pp,col){return bx(grp,ax==='x'?len:th,h,ax==='x'?th:len,ax==='x'?u:pp,y,ax==='x'?pp:u,col);};
@@ -1462,7 +1558,7 @@ ELM.pad.addEventListener('pointerdown',function(e){var b=e.target.closest('[data
 function setView(v){
   S.view=v; var is3=v==='3d';
   document.querySelectorAll('#views .tab').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-v')===v);});
-  $('#bar2d').hidden=is3; $('#hint2d').hidden=is3; $('#canvas').hidden=is3; $('#v3d').hidden=!is3;
+  $('#bar2d').hidden=is3; $('#wtools').hidden=is3; $('#hint2d').hidden=is3; $('#canvas').hidden=is3; $('#v3d').hidden=!is3;
   document.querySelector('.layout').classList.toggle('v3d',is3);
   if(is3){
     if(!V3.ready&&!init3D()) return;
