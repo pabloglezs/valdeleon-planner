@@ -4,3 +4,4 @@ src
 README.md
 docker-compose*.yml
 *.tar.gz
+assets
