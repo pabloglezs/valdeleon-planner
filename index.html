@@ -824,11 +824,11 @@ function glowBox(g,w,h,d,x,y,z){
   var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mats._g||(mats._g=new THREE.MeshStandardMaterial({color:0xf6e7bd,emissive:0xf2d27a,emissiveIntensity:.7,roughness:.9})));
   m.position.set(x,y+h/2,z); g.add(m); return m;
 }
-function bx(g,w,h,d,x,y,z,col){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat(col));m.position.set(x,y+h/2,z);m.castShadow=true;m.receiveShadow=true;g.add(m);return m;}
+function bx(g,w,h,d,x,y,z,col){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),typeof col==='string'?mat(col):col);m.position.set(x,y+h/2,z);m.castShadow=true;m.receiveShadow=true;g.add(m);return m;}
 function cy(g,r,h,x,y,z,col,turn){var m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,20),mat(col));m.position.set(x,y+h/2,z);if(turn)m.rotation.x=Math.PI/2;m.castShadow=true;m.receiveShadow=true;g.add(m);return m;}
 function ball(g,r,x,y,z,col){var m=new THREE.Mesh(new THREE.SphereGeometry(r,16,12),mat(col));m.position.set(x,y,z);m.castShadow=true;g.add(m);return m;}
 function isDark(){var th=document.documentElement.getAttribute('data-theme');return th==='dark'||(th!=='light'&&!!window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);}
-function pal(){var P=pal0();P.dk=isDark();return P;}
+function pal(){var P=pal0();P.dk=isDark();P.wallExt=P.dk?'#a89a88':'#e8d6bf';P.wallInt=P.dk?'#bdb8ae':'#f6f3ee';return P;}
 function pal0(){
   var th=document.documentElement.getAttribute('data-theme');
   var dk=th==='dark'||(th!=='light'&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches);
@@ -850,7 +850,7 @@ function gableRoof(rg,P,cx,hw,z0,z1){
   var A=[x0,base,za],B=[x1,base,za],C=[x1,top,zm],D=[x0,top,zm],E=[x0,base,zb],F2=[x1,base,zb];
   tri(sl,A,B,C); tri(sl,A,C,D); tri(sl,E,F2,C); tri(sl,E,C,D);
   tri(gb,A,E,D); tri(gb,B,F2,C);
-  var tile=new THREE.MeshStandardMaterial({map:mkTex('roof',1,1),color:P.dk?0x9c9c9c:0xffffff,roughness:.85,side:THREE.DoubleSide}),wl=new THREE.MeshStandardMaterial({color:P.wall,roughness:.9,side:THREE.DoubleSide});
+  var tile=new THREE.MeshStandardMaterial({map:mkTex('roof',1,1),color:P.dk?0x9c9c9c:0xffffff,roughness:.85,side:THREE.DoubleSide}),wl=new THREE.MeshStandardMaterial({color:P.wallExt,roughness:.9,side:THREE.DoubleSide});
   rg.add(meshFrom(sl,tile,function(x,y,z){return [x/1.0,(z<=zm?Math.hypot(z-za,y-base):Math.hypot(zb-z,y-base))/1.2];})); rg.add(meshFrom(gb,wl));
 }
 /* tejadillo del porche trasero: una sola vertiente pegada a la fachada, viga oscura y un pilar */
@@ -1109,13 +1109,14 @@ function openings3D(g,f,F,P,W){
     var b2=function(len,h,th,u,y,pp,col){return bx(grp,ax==='x'?len:th,h,ax==='x'?th:len,ax==='x'?u:pp,y,ax==='x'?pp:u,col);};
     var b=function(len,h,th,u,y,col){return b2(len,h,th,u,y,p,col);};
     var WOOD='#6b4a2f',ST='#c79b58';
-    b(w,.5,t,c,2.1,P.wall);
+    var wm=triMat('stucco',.5); wm.color.set(k==='i'?P.wallInt:P.wallExt);   /* mismo acabado que el muro para que no se vea una franja distinta */
+    b(w,.5,t,c,2.1,wm);
     if(k==='v'||k==='b'||k==='p'){
       b(w+.32,.22,t+.06,c,2.1,ST);
       [c-w/2-.08,c+w/2+.08].forEach(function(u){b(.16,k==='v'?1.52:2.32,t+.06,u,k==='v'?.78:0,ST);});
     }
     if(k==='v'){
-      b(w,.9,t,c,0,P.wall); b(w+.32,.1,t+.12,c,.78,ST);
+      b(w,.9,t,c,0,wm); b(w+.32,.1,t+.12,c,.78,ST);
       [c-w/2+.025,c+w/2-.025].forEach(function(u){b(.05,1.2,.08,u,.9,WOOD);});
       b(w,.05,.08,c,.9,WOOD); b(w,.05,.08,c,2.05,WOOD); if(w>1.1) b(.04,1.2,.07,c,.9,WOOD);
     } else if(k==='b'){
