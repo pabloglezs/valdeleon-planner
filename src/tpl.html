@@ -1,4 +1,5 @@
 <title>Valdeleón Planner</title>
+<link rel="icon" type="image/png" href="__FAVICON__">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1239,7 +1240,10 @@ function build3D(){
     }
     var clr=STAIR_CLEAR[f];
     var rects=wallRects(f).filter(function(r){
-      if(!clr) return true; var cx=r[0]+r[2]/2,cz=r[1]+r[3]/2; return !(cx>clr[0]&&cx<clr[2]&&cz>clr[1]&&cz<clr[3]);
+      var cx=r[0]+r[2]/2,cz=r[1]+r[3]/2;
+      /* lo que el plano dibuja detrás de la fachada trasera (pilar del porche y muro del forjado superior) no existe */
+      if(cz<hy-.15&&(f==='primera'||(f==='baja'&&cx<8.6))) return false;
+      if(!clr) return true; return !(cx>clr[0]&&cx<clr[2]&&cz>clr[1]&&cz<clr[3]);
     }).map(function(r){return S.mirror?[F.w-(r[0]+r[2]),r[1],r[2],r[3]]:r;});
     var W3={g:g,rects:rects,op:[],hc:[mxF(F,hx+hw/2),hy+hh/2],mesh:null,key:''};
     if(rects.length){
@@ -1290,6 +1294,7 @@ function wallAt(f,xcm,ycm){
   var m=WALL[f]; if(!m) return false;
   if(S.mirror) xcm=FLOORS[f].w*100-xcm;
   var sc=STAIR_CLEAR[f]; if(sc&&xcm/100>sc[0]&&xcm/100<sc[2]&&ycm/100>sc[1]&&ycm/100<sc[3]) return false;
+  if(ycm/100<FLOORS[f].house[1]-.15&&(f==='primera'||(f==='baja'&&xcm/100<8.6))) return false;
   var ppc=m.w/(FLOORS[f].w*100), px=Math.floor(xcm*ppc), py=Math.floor(ycm*ppc);
   if(px<0||py<0||px>=m.w||py>=m.h) return false;
   return m.a[py*m.w+px]>128;
