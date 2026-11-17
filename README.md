@@ -1,4 +1,9 @@
-# Valdeleón Planner
+<p align="center">
+  <img src="assets/logo.png" alt="Valdeleón Planner" width="180">
+</p>
+
+<h1 align="center">Valdeleón Planner</h1>
+
 
 Plano interactivo para decorar un chalet esquinero de Residencial Valdeleón (Valdefresno, León): muebles a escala sobre los muros del plano de venta, vista 3D con modo "caminar", botón para invertir la casa (los esquineros existen en las dos orientaciones) y catálogo de casi 200 muebles, con tecnología, iluminación y decoración. En 3D se pueden bajar u ocultar los muros (recorte al estilo Sims, bajos u ocultos) para ver el interior. Las escaleras (en C entre planta baja y primera, recta desde el sótano) se suben andando, las ventanas llevan marco, cristal y jambas de piedra, y los acabados (parqué, baldosa, estuco, teja, grava) son texturas generadas en el navegador.
 
@@ -13,7 +18,8 @@ Es una página estática (`index.html`) servida por nginx. Los muros van incrust
 | `nginx.conf` | Servidor, cabeceras de seguridad y `/healthz` |
 | `docker-compose.yml` | Stack que construye la imagen desde este repositorio |
 | `docker-compose.portainer.yml` | Stack que usa una imagen ya construida (sin Git) |
-| `src/` | Plantilla, máscaras de muros y script para regenerar `index.html` |
+| `src/` | Plantilla, máscaras de muros, favicon y script para regenerar `index.html` |
+| `assets/` | Logo del proyecto |
 
 ## Despliegue continuo con Portainer
 

@@ -13,6 +13,7 @@ for f in ('sotano', 'baja', 'primera'):
     b = base64.b64encode(open(os.path.join(here, f + '_mask.png'), 'rb').read()).decode()
     s = s.replace('__MASK_' + f + '__', 'data:image/png;base64,' + b)
 s = s.replace('__LAYOUT__', open(os.path.join(here, 'layout.json'), encoding='utf8').read())
+s = s.replace('__FAVICON__', 'data:image/png;base64,' + base64.b64encode(open(os.path.join(here, 'favicon.png'), 'rb').read()).decode())
 
 # La plantilla trae solo el contenido; aquí se envuelve en un documento completo
 i = s.index('<div class="app">')
