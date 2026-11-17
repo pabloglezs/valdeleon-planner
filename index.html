@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style>:root{color-scheme:light}[hidden]{display:none!important}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}</style>
-<title>Plano del Chalet 98</title>
+<title>Valdeleón Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
@@ -16,18 +16,18 @@
   --bg:#eceeed; --surface:#fbfbfa; --ink:#1b2220; --ink2:#4c5754; --muted:#76827e; --line:#cdd3d0;
   --wall:#232a28; --floor:#ffffff; --ground:#dfe7df; --grid:#d6dcd9;
   --accent:#176b5a; --accent-ink:#ffffff; --sel:#e8590c; --bad:#cf2e2e;
-  --c-salon:#3b6ea8; --c-cocina:#b7791f; --c-dorm:#9a5a8a; --c-bano:#1c8a8a; --c-ext:#3d8a3d; --c-gar:#5b6770; --c-luz:#b8900f; --c-deco:#7a6bb0;
+  --c-salon:#3b6ea8; --c-cocina:#b7791f; --c-dorm:#9a5a8a; --c-bano:#1c8a8a; --c-ext:#3d8a3d; --c-gar:#5b6770; --c-luz:#b8900f; --c-deco:#7a6bb0; --c-ofi:#2f7f9c;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#141918; --surface:#1d2423; --ink:#e7ecea; --ink2:#aab5b1; --muted:#84908c; --line:#333d3b;
   --wall:#cfd8d4; --floor:#232b2a; --ground:#1b2a21; --grid:#2c3634;
   --accent:#4fc2a5; --accent-ink:#0b1412; --sel:#ff8a3d; --bad:#ff6b6b;
-  --c-salon:#7fa8dd; --c-cocina:#e0b04f; --c-dorm:#c98fbb; --c-bano:#5fd0d0; --c-ext:#79c779; --c-gar:#9aa8b2; --c-luz:#f0cf5a; --c-deco:#a99bdc; color-scheme:dark}}
+  --c-salon:#7fa8dd; --c-cocina:#e0b04f; --c-dorm:#c98fbb; --c-bano:#5fd0d0; --c-ext:#79c779; --c-gar:#9aa8b2; --c-luz:#f0cf5a; --c-deco:#a99bdc; --c-ofi:#6fc0e0; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141918; --surface:#1d2423; --ink:#e7ecea; --ink2:#aab5b1; --muted:#84908c; --line:#333d3b;
   --wall:#cfd8d4; --floor:#232b2a; --ground:#1b2a21; --grid:#2c3634;
   --accent:#4fc2a5; --accent-ink:#0b1412; --sel:#ff8a3d; --bad:#ff6b6b;
-  --c-salon:#7fa8dd; --c-cocina:#e0b04f; --c-dorm:#c98fbb; --c-bano:#5fd0d0; --c-ext:#79c779; --c-gar:#9aa8b2; --c-luz:#f0cf5a; --c-deco:#a99bdc; color-scheme:dark}
+  --c-salon:#7fa8dd; --c-cocina:#e0b04f; --c-dorm:#c98fbb; --c-bano:#5fd0d0; --c-ext:#79c779; --c-gar:#9aa8b2; --c-luz:#f0cf5a; --c-deco:#a99bdc; --c-ofi:#6fc0e0; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45;
@@ -150,13 +150,13 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 <div class="app">
   <header>
     <div>
-      <h1>Plano del Chalet 98</h1>
-      <p class="sub">Residencial Valdeleón, Valdefresno (León). Muebles a escala sobre los muros del plano de venta.</p>
+      <h1>Planificador de chalet esquinero</h1>
+      <p class="sub">Residencial Valdeleón, Valdefresno (León). Muebles a escala sobre el plano de venta del esquinero tipo, en tu orientación o invertido.</p>
     </div>
-    <div class="facts" aria-label="Datos de la vivienda">
-      <span><b>200,83 m²</b> útiles</span><span><b>3</b> plantas</span><span>parcela <b>189,39 m²</b></span><span>patio <b>109,64 m²</b></span>
+    <div class="facts" aria-label="Datos del plano tipo">
+      <span>Plano tipo</span><span><b>200,83 m²</b> útiles</span><span><b>3</b> plantas</span><span>parcela <b>189,39 m²</b></span><span>patio <b>109,64 m²</b></span>
     </div>
-    <button class="btn" id="tmirror" aria-pressed="false" title="Refleja la casa entera de izquierda a derecha, con sus muebles, para una vivienda con la distribución invertida">Casa en espejo</button>
+    <button class="btn" id="tmirror" aria-pressed="false" title="Los chalets esquineros se construyen en las dos orientaciones: invierte el plano, con sus muebles, para que coincida con el tuyo">Invertir casa (espejo)</button>
   </header>
 
   <div class="layout">
@@ -298,7 +298,9 @@ var GROUPS=[
  {id:'luz',cat:'luz',name:'Iluminación',t:{
   lampp:['Lámpara de pie','Lámpara',35,35,'lamp'],lamppG:['Lámpara de pie grande','Lámpara',50,50,'lamp'],lampm:['Lámpara de mesita','',25,25,'lamp'],
   pend40:['Lámpara colgante 40','Colgante',40,40,'pend'],pend60:['Lámpara colgante 60','Colgante',60,60,'pend'],pend100:['Lámpara colgante 100','Colgante',100,100,'pend'],
-  pendl:['Colgante lineal 120','Colgante',120,20,'pendl'],plafon:['Plafón de techo 45','Plafón',45,45,'ceil'],plafon60:['Plafón de techo 60','Plafón',60,60,'ceil']}},
+  pendl:['Colgante lineal 120','Colgante',120,20,'pendl'],plafon:['Plafón de techo 45','Plafón',45,45,'ceil'],plafon60:['Plafón de techo 60','Plafón',60,60,'ceil'],
+  tripode:['Lámpara de pie trípode','Lámpara',45,45,'lamp'],lampS:['Lámpara de sobremesa','',30,30,'lamp'],ventilador:['Ventilador de techo','Ventilador',100,100,'fan'],spot:['Foco empotrado','',12,12,'ceil'],
+  carril:['Carril de focos 150','Carril',150,6,'track'],led100:['Tira LED 100','',100,3,'led'],aplique:['Aplique de pared','',15,10,'sconce'],neon:['Neón decorativo','Neón',60,4,'sconce']}},
  {id:'plantas',cat:'ext',name:'Plantas y setos',t:{
   plantaC:['Cactus o suculenta','',20,20,'plant'],plantaM:['Planta mediana','',35,35,'plant'],plantaG:['Planta grande (ficus)','Ficus',55,55,'plant'],palmera:['Palmera de interior','Palmera',80,80,'plant'],
   jardinera:['Jardinera 120','Jardinera',120,35,'planter'],jardineraL:['Jardinera larga 200','Jardinera',200,40,'planter'],seto:['Seto 200','Seto',200,50,'hedge'],setoC:['Seto 100','Seto',100,50,'hedge']}},
@@ -306,11 +308,29 @@ var GROUPS=[
   cuadro:['Cuadro 100','Cuadro',100,8,'art'],cuadro60:['Cuadro 60','',60,8,'art'],espejo:['Espejo de pared 80','Espejo',80,8,'mirror'],espejoP:['Espejo de pie','Espejo',50,8,'mirror'],
   repisa:['Repisa 100','Repisa',100,25,'shelf'],cortina:['Cortina 200','Cortina',200,12,'curtain'],cortina300:['Cortina 300','Cortina',300,12,'curtain'],
   zapatero:['Zapatero','Zapatero',80,30,'plain'],recibidor:['Banco de entrada','Banco',100,35,'plain'],
-  alf120:['Alfombra 120×170','Alfombra',120,170,'rug'],alfpas:['Alfombra de pasillo 80×200','Alfombra',80,200,'rug']}}
+  alf120:['Alfombra 120×170','Alfombra',120,170,'rug'],alfpas:['Alfombra de pasillo 80×200','Alfombra',80,200,'rug'],
+  reloj:['Reloj de pared','',30,4,'art'],galeria:['Galería de cuadros','Galería',150,8,'art'],biombo:['Biombo 150','Biombo',150,8,'plain'],cesto:['Cesto de mimbre','',40,40,'plain'],
+  jarron:['Jarrón de suelo','',25,25,'vase'],perchero:['Perchero de pie','',35,35,'coatrack'],mesaAux:['Mesa auxiliar redonda','Mesa aux.',45,45,'round'],tocador:['Tocador','Tocador',100,45,'plain']}},
+ {id:'ofi',cat:'ofi',name:'Escritorio y tecnología',t:{
+  escrL:['Escritorio en L','Escritorio L',160,140,'Ldesk',60],escrG:['Escritorio gaming 160','Escritorio',160,75,'table'],escrE:['Escritorio elevable 140','Escritorio',140,70,'table'],
+  cajonera:['Cajonera con ruedas','Cajonera',40,50,'plain'],sillaErg:['Silla ergonómica','',65,65,'chair'],
+  mon24:['Monitor 24"','Monitor',54,18,'monitor'],mon27:['Monitor 27"','Monitor',61,20,'monitor'],monU:['Monitor panorámico 34"','Monitor',80,22,'monitor'],
+  monD:['Doble monitor 24"','Monitores',112,18,'monitor'],mon27E:['Monitor 27" con elevador','Monitor',61,22,'monitor'],elev:['Elevador de monitor','Elevador',55,22,'riser'],
+  portatil:['Portátil 15"','Portátil',36,25,'laptop'],portatil13:['Portátil 13"','Portátil',31,22,'laptop'],portatilE:['Portátil con soporte elevado','Portátil',36,26,'laptop'],
+  teclado:['Teclado','Teclado',44,14,'keyboard'],tecladoM:['Teclado compacto','',36,13,'keyboard'],alfmat:['Alfombrilla XL','Alfombrilla',80,30,'mat'],
+  tower:['Torre de PC','',22,45,'tower'],miniPC:['Mini PC','',20,20,'appl'],flexo:['Flexo','Flexo',20,20,'flexo'],impr:['Impresora','Impresora',40,35,'appl'],
+  altav:['Altavoz','',14,14,'appl'],mic:['Micrófono con brazo','',15,15,'appl'],auric:['Auriculares con soporte','',12,12,'appl'],organiz:['Organizador de escritorio','',25,15,'appl'],
+  router:['Router wifi','',22,15,'appl'],pizarra:['Pizarra blanca 90×60','Pizarra',90,8,'art'],corcho:['Panel de corcho 80×60','Corcho',80,8,'art']}},
+ {id:'tv',cat:'salon',name:'TV y multimedia',t:{
+  tv43:['TV 43" sobre mueble','TV',97,20,'tvset'],tv55:['TV 55" sobre mueble','TV',123,22,'tvset'],tv65:['TV 65" sobre mueble','TV',145,22,'tvset'],
+  tvw55:['TV 55" en la pared','TV',123,8,'tvw'],tvw65:['TV 65" en la pared','TV',145,8,'tvw'],barra:['Barra de sonido','Barra',90,10,'soundbar'],
+  consola:['Consola de videojuegos','',30,25,'appl'],sub:['Altavoz grave (subwoofer)','',30,30,'appl']}},
+ {id:'peq',cat:'cocina',name:'Pequeños electrodomésticos',t:{
+  micro:['Microondas','Microondas',45,35,'appl'],cafet:['Cafetera','',25,30,'appl'],tost:['Tostadora','',30,18,'appl'],freid:['Freidora de aire','',30,35,'appl'],robot:['Robot de cocina','',25,25,'appl']}}
 ];
 var TYPES={};
 GROUPS.forEach(function(g){Object.keys(g.t).forEach(function(k){var a=g.t[k];TYPES[k]={n:a[0],s:a[1],w:a[2],h:a[3],k:a[4],cat:g.cat,at:a[5]||0};});});
-var OPEN_BY_FLOOR={sotano:['gar'],baja:['salon','cocina','ext','luz','plantas'],primera:['dorm','bano','luz']};
+var OPEN_BY_FLOOR={sotano:['gar'],baja:['salon','cocina','ext','luz','plantas'],primera:['dorm','bano','luz','ofi']};
 
 /* ---------- propuesta inicial: [planta, tipo, x m, y m, giro] ---------- */
 var DEFAULT=[["baja", "sofa3", 3.5, 4.6, 270], ["baja", "alf", 4.75, 4.6, 0], ["baja", "mcentro", 4.75, 4.6, 90], ["baja", "tv", 5.9, 4.6, 90], ["baja", "mesaC", 4.2, 8.2, 0], ["baja", "silla", 3.8, 7.52, 0], ["baja", "silla", 4.6, 7.52, 0], ["baja", "silla", 3.8, 8.88, 180], ["baja", "silla", 4.6, 8.88, 180], ["baja", "nevera", 3.33, 9.66, 0], ["baja", "enc", 3.34, 11.25, 270], ["baja", "mcoc", 4.95, 11.2, 0], ["baja", "silla", 4.65, 10.6, 0], ["baja", "silla", 5.25, 10.6, 0], ["baja", "silla", 4.65, 11.8, 180], ["baja", "silla", 5.25, 11.8, 180], ["baja", "c135", 8.05, 4.2, 0], ["baja", "mesita", 7.05, 3.3, 0], ["baja", "arm200", 6.5, 4.8, 270], ["baja", "mesaJ", 5.9, 1.45, 0], ["baja", "silla", 5.4, 0.72, 0], ["baja", "silla", 6.4, 0.72, 0], ["baja", "silla", 5.4, 2.18, 180], ["baja", "silla", 6.4, 2.18, 180], ["baja", "tumb", 1.2, 17.0, 0], ["baja", "tumb", 2.2, 17.0, 0], ["baja", "bbq", 7.9, 14.5, 0], ["baja", "maceta", 0.6, 13.6, 0], ["baja", "maceta", 8.5, 13.6, 0], ["baja", "arbol", 3.0, 19.3, 0], ["primera", "c135", 1.65, 3.89, 270], ["primera", "mesita", 0.82, 4.85, 270], ["primera", "arm120", 1.35, 6.14, 180], ["primera", "escr", 3.25, 4.7, 90], ["primera", "c135", 5.47, 3.88, 90], ["primera", "mesita", 6.32, 4.85, 90], ["primera", "arm120", 5.7, 6.14, 180], ["primera", "escr", 3.95, 4.9, 270], ["primera", "c150", 1.68, 11.0, 270], ["primera", "mesita", 0.94, 10.0, 270], ["primera", "arm200", 2.2, 9.46, 0], ["primera", "comoda", 3.65, 12.14, 180], ["sotano", "coche", 3.3, 3.2, 90], ["sotano", "estG", 0.73, 2.5, 270], ["sotano", "banco", 5.97, 2.5, 90], ["sotano", "estG", 6.07, 4.8, 90]];
@@ -345,12 +365,16 @@ function save(){
 var $=function(s){return document.querySelector(s);};
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function fmt(n){return (Math.round(n)/100).toFixed(2).replace('.',',');}
-function isRound(T){return T.k==='round'||T.k==='plant'||T.k==='lamp'||T.k==='pend'||T.k==='ceil';}
-var GH={rug:1,pend:1,pendl:1,ceil:1,art:1,mirror:1,curtain:1,shelf:1};
-function ghost(it){return !!GH[TYPES[it.t].k]||it.t==='lampm';}
+function isRound(T){return T.k==='round'||T.k==='plant'||T.k==='lamp'||T.k==='pend'||T.k==='ceil'||T.k==='fan'||T.k==='vase'||T.k==='coatrack';}
+var GH={rug:1,pend:1,pendl:1,ceil:1,art:1,mirror:1,curtain:1,shelf:1,mat:1,tvw:1,sconce:1,led:1,track:1,fan:1};
+/* altura (m) a la que se apoyan los objetos que van sobre una mesa, un mueble, una encimera o la pared */
+var EL={lampm:.5,lampS:.74,espejo:1,espejoP:.1,cuadro:1.3,cuadro60:1.3,repisa:1.4,pizarra:1.2,corcho:1.2,reloj:1.8,galeria:1.2,tvw55:.8,tvw65:.75,aplique:1.7,neon:1.8,led100:.5,
+ mon24:.74,mon27:.74,monU:.74,monD:.74,mon27E:.74,elev:.74,portatil:.74,portatil13:.74,portatilE:.74,teclado:.74,tecladoM:.74,alfmat:.74,miniPC:.74,flexo:.74,impr:.74,altav:.74,mic:.74,auric:.74,organiz:.74,router:.74,
+ tv43:.45,tv55:.45,tv65:.45,barra:.45,consola:.45,micro:.92,cafet:.92,tost:.92,freid:.92,robot:.92};
+function ghost(it){return !!GH[TYPES[it.t].k]||(EL[it.t]||0)>=.3;}
 function roundDeco(it,T){
   var r=it.w/2,c=function(k){return '<circle class="d" r="'+(r*k)+'"/>';};
-  return T.k==='plant'?c(.6)+c(.25):T.k==='lamp'?c(.55)+c(.15):T.k==='pend'?c(.62)+c(.2):T.k==='ceil'?c(.7):'';
+  return T.k==='plant'?c(.6)+c(.25):T.k==='lamp'?c(.55)+c(.15):T.k==='pend'?c(.62)+c(.2):T.k==='ceil'?c(.7):T.k==='fan'?c(.5)+c(.12):T.k==='vase'?c(.6):T.k==='coatrack'?c(.5)+c(.12):'';
 }
 function bbox(it){var q=(it.r%180)!==0;return {w:q?it.h:it.w,h:q?it.w:it.h};}
 function cur(){return S.items.filter(function(i){return i.f===S.floor;});}
@@ -420,6 +444,14 @@ function deco(it,T){
       s+='<rect class="s" x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+b+'" rx="6"/>';
       if(w>=h*1.1){s+='<rect class="s" x="'+x0+'" y="'+y0+'" width="'+ar+'" height="'+h+'" rx="6"/><rect class="s" x="'+(x0+w-ar)+'" y="'+y0+'" width="'+ar+'" height="'+h+'" rx="6"/>';}
       break;
+    case 'monitor': s+='<rect class="d" x="'+(x0+w*.4)+'" y="'+(y0+h*.3)+'" width="'+(w*.2)+'" height="'+(h*.5)+'"/>'; break;
+    case 'laptop': s+='<path class="d" d="M'+x0+' '+(y0+h*.3)+'H'+(x0+w)+'"/><rect class="d" x="'+(x0+4)+'" y="'+(y0+h*.4)+'" width="'+(w-8)+'" height="'+(h*.5)+'" rx="2"/>'; break;
+    case 'keyboard': s+='<path class="d" d="M'+x0+' '+(y0+h*.35)+'H'+(x0+w)+'M'+x0+' '+(y0+h*.65)+'H'+(x0+w)+'"/>'; break;
+    case 'flexo': s+='<circle class="d" cx="0" cy="'+(y0+h*.3)+'" r="'+(w*.22)+'"/><path class="d" d="M0 '+(y0+h*.3)+'V'+(y0+h*.85)+'"/>'; break;
+    case 'tower': s+='<circle class="d" cx="0" cy="'+(y0+h*.3)+'" r="'+(w*.22)+'"/>'; break;
+    case 'riser': s+='<path class="d" d="M'+(x0+w*.1)+' '+y0+'V'+(y0+h)+'M'+(x0+w*.9)+' '+y0+'V'+(y0+h)+'"/>'; break;
+    case 'appl': case 'tvset': case 'soundbar': case 'sconce': case 'led': case 'track': case 'mat':
+      s+='<rect class="d" x="'+(x0+3)+'" y="'+(y0+3)+'" width="'+Math.max(2,w-6)+'" height="'+Math.max(2,h-6)+'" rx="2"/>'; break;
     case 'Lsofa':
       var lt=Math.min(T.at,w-20,h-20),lb=18;
       s+='<rect class="s" x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+lb+'" rx="5"/><rect class="s" x="'+(x0+w-lb)+'" y="'+y0+'" width="'+lb+'" height="'+h+'" rx="5"/>'+
@@ -453,7 +485,7 @@ function deco(it,T){
 }
 function itemSVG(it,bad){
   var T=TYPES[it.t],round=isRound(T);
-  var cls='item cat-'+T.cat+(T.k==='rug'?' rug':GH[T.k]||it.t==='lampm'?' ghost':'')+(it.id===S.sel?' sel':'')+(bad?' bad':'');
+  var cls='item cat-'+T.cat+(T.k==='rug'?' rug':ghost(it)?' ghost':'')+(it.id===S.sel?' sel':'')+(bad?' bad':'');
   var lt=T.at?Math.min(T.at,it.w-20,it.h-20):0, hw=it.w/2, hh=it.h/2;
   var body=round
     ? '<circle class="f" r="'+(it.w/2)+'"/>'+roundDeco(it,T)
@@ -465,7 +497,7 @@ function itemSVG(it,bad){
     if(len<along-8) lab='<text class="lbl" transform="rotate('+(-it.r)+(vert?' rotate(-90)':'')+')">'+esc(name)+'</text>';
   }
   var col='style="--c:var(--c-'+T.cat+')"';
-  return '<g class="'+cls+'" '+col+' data-id="'+it.id+'" transform="translate('+it.x+' '+it.y+') rotate('+it.r+')">'+(it.m?'<g transform="scale(-1 1)">'+body+(round?'':deco(it,T))+'</g>':body+(round?'':deco(it,T)))+lab+'</g>';
+  return '<g class="'+cls+'" '+col+' data-id="'+it.id+'" transform="translate('+it.x+' '+it.y+') rotate('+it.r+')"><title>'+esc(T.n)+'</title>'+(it.m?'<g transform="scale(-1 1)">'+body+(round?'':deco(it,T))+'</g>':body+(round?'':deco(it,T)))+lab+'</g>';
 }
 function overlayFor(it){
   var B=bbox(it);
@@ -681,8 +713,12 @@ function oxOf(f){return S.mirror?(FLOORS[f].w-6.55)*100-ORG[f][0]:ORG[f][0];}
 function spawnX(f){return S.mirror?FLOORS[f].w-SPAWN[f][0]:SPAWN[f][0];}
 function mxF(F,x){return S.mirror?F.w-x:x;}
 var SPAWN={sotano:[3.3,7.6],baja:[6.5,12.0],primera:[3.9,8.0]}; /* m en cada plano */
-var EL={lampm:.5,espejo:1,espejoP:.1,cuadro:1.3,cuadro60:1.3,repisa:1.4}, MH={espejo:.8,espejoP:1.7,cuadro:.7,cuadro60:.5};
-var HT={mcentro:.4,mcentro2:.4,mcentroR:.4,banco:.9,puf:.42}, HP={aparador:.8,aparador2:.8,estante:1.8,libreria:2,estG:1.8,estG120:1.8,mesita:.5,mesita2:.5,comoda:.8,comoda80:.8,comoda120:.8,comoda150:.8,banqueta:.45,bpie:.45,bici:1,moto:1.1,cobertizo:2.2,arcon:.85,zapatero:1,recibidor:.45};
+var MH={espejo:.8,espejoP:1.7,cuadro:.7,cuadro60:.5,pizarra:.6,corcho:.6,reloj:.3,galeria:.7};
+var LH={lampp:1.35,lamppG:1.55,tripode:1.45,lampm:.2,lampS:.3};
+var ARTC={pizarra:['#8d8d88','#f4f4f0'],corcho:['#7a5d3e','#b98f62'],reloj:['#3a2d24','#f4f1ea']};
+var SM={micro:[.28,'#c9cdd0'],cafet:[.35,'#2b2e30'],tost:[.2,'#d6d6d0'],freid:[.32,'#2b2e30'],robot:[.38,'#cfd2d4'],consola:[.06,'#e8e8e8'],router:[.04,'#222'],impr:[.18,'#d9dcdd'],
+ altav:[.25,'#2b2e30'],mic:[.3,'#222'],auric:[.25,'#2b2e30'],organiz:[.12,'#8a6a48'],miniPC:[.05,'#222'],sub:[.35,'#2b2e30']};
+var HT={mcentro:.4,mcentro2:.4,mcentroR:.4,banco:.9,puf:.42,escrE:1.05,mesaAux:.5}, HP={aparador:.8,aparador2:.8,estante:1.8,libreria:2,estG:1.8,estG120:1.8,mesita:.5,mesita2:.5,comoda:.8,comoda80:.8,comoda120:.8,comoda150:.8,banqueta:.45,bpie:.45,bici:1,moto:1.1,cobertizo:2.2,arcon:.85,zapatero:1,recibidor:.45,biombo:1.6,cesto:.4,tocador:.75,cajonera:.6};
 var renderer,scene,camera,controls,rootG,ground,sun,mats={},wallCache={};
 var ELM={view:$('#view3d'),msg:$('#msg3d'),pad:$('#pad'),tip:$('#tip3d')};
 
@@ -825,17 +861,58 @@ function furn3(it){
       }
       else{var ph=Math.min(.35,w*.9);cy(g,w*.4,ph,0,0,0,'#9a6b4a');ball(g,w*.36+.03,0,ph+w*.3,0,'#5e9a56');} break;
     case 'lamp':
-      var sh1=it.t==='lampm',lh2=sh1?.2:1.35;
+      var lh2=LH[it.t]||1.35,sh1=lh2<.5;
       cy(g,w*.35,.03,0,0,0,'#2b2e30'); cy(g,.015,lh2,0,.03,0,'#2b2e30'); glow(g,w*(sh1?.5:.45),sh1?.2:.3,0,.03+lh2-.05,0); break;
     case 'pend': cy(g,.006,.7,0,1.9,0,'#222'); glow(g,w/2,.22,0,1.72,0); break;
     case 'pendl':
       bx(g,w,.05,d,0,1.85,0,'#2b2e30'); glowBox(g,w-.04,.02,d-.04,0,1.83,0);
       [-1,1].forEach(function(sx){cy(g,.006,.7,sx*(w/2-.1),1.9,0,'#222');}); break;
     case 'ceil': glow(g,w/2,.03,0,2.57,0); break;
+    case 'monitor':
+      var up=/E$/.test(it.t)?.1:0,ns=w>1?2:1,sw3=w/ns-(ns>1?.02:0),sh3=sw3*.58;
+      if(up){bx(g,w*.9,.025,d,0,.075,0,'#b98f62');[-1,1].forEach(function(sx){bx(g,.03,.075,d,sx*(w*.45-.03),0,0,'#b98f62');});}
+      for(i=0;i<ns;i++){
+        x=ns===1?0:(i?1:-1)*(sw3/2+.01);
+        bx(g,.2,.01,d*.9,x,up,0,'#222'); bx(g,.04,.14,.03,x,up,-d*.2,'#222');
+        bx(g,sw3,sh3,.025,x,up+.1,-d/2+.06,'#111'); bx(g,sw3-.02,sh3-.02,.027,x,up+.11,-d/2+.06,'#1d2a3a');
+      } break;
+    case 'riser': bx(g,w,.025,d,0,.075,0,'#b98f62'); [-1,1].forEach(function(sx){bx(g,.03,.075,d,sx*(w/2-.03),0,0,'#b98f62');}); break;
+    case 'laptop':
+      var lup=/E$/.test(it.t)?.14:0;
+      if(lup){bx(g,w*.8,.02,d,0,.12,0,'#9aa0a6');[-1,1].forEach(function(sx){bx(g,.02,.12,d*.9,sx*w*.34,0,0,'#9aa0a6');});}
+      bx(g,w,.02,d,0,lup,0,'#9aa0a6'); bx(g,w-.04,.004,d*.55,0,lup+.02,d*.15,'#2b2e30');
+      var lsc=bx(g,w,d*.9,.008,0,lup+.02,-d/2,'#1c1f22');
+      lsc.rotation.x=-.3; lsc.position.y=lup+.02+d*.45*Math.cos(.3); lsc.position.z=-d/2+.01-d*.45*Math.sin(.3); break;
+    case 'keyboard': bx(g,w,.02,d,0,0,0,'#2b2e30'); bx(g,w-.03,.006,d-.03,0,.02,0,'#4a4f54'); break;
+    case 'mat': bx(g,w,.005,d,0,0,0,'#2b3036'); break;
+    case 'tower': bx(g,w,.45,d,0,0,0,'#1f2225'); glowBox(g,.02,.012,.03,0,.38,d/2); break;
+    case 'flexo':
+      cy(g,.07,.015,0,0,-d*.2,'#222'); bx(g,.014,.3,.014,0,.015,-d*.2,'#222'); bx(g,.012,.012,d*.7,0,.31,0,'#222'); glow(g,.045,.08,0,.26,d*.3); break;
+    case 'fan':
+      cy(g,.05,.1,0,2.5,0,'#6b5236'); cy(g,.01,.1,0,2.6,0,'#444');
+      for(i=0;i<4;i++){var bg=new THREE.Group();bx(bg,w/2-.12,.012,.14,(w/2+.12)/2,2.46,0,'#6b5236');bg.rotation.y=i*Math.PI/2+.4;g.add(bg);}
+      glow(g,.1,.06,0,2.42,0); break;
+    case 'sconce': glowBox(g,w,.15,d,0,0,0); bx(g,w*.3,.05,.02,0,.05,-d/2-.01,'#222'); break;
+    case 'led': glowBox(g,w,.012,d,0,0,0); break;
+    case 'track': bx(g,w,.03,d,0,2.55,0,'#222'); [-.33,0,.33].forEach(function(p){glow(g,.03,.07,p*w,2.47,0);}); break;
+    case 'tvset':
+      bx(g,.3,.02,d*.7,0,0,d*.1,'#222'); bx(g,.05,.1,.03,0,.02,-d*.1,'#222');
+      bx(g,w,w*.56,.03,0,.1,-d/2+.06,'#0f1113'); bx(g,w-.03,w*.56-.03,.032,0,.115,-d/2+.06,'#1a2430'); break;
+    case 'tvw': bx(g,w,w*.56,.04,0,0,-d/2+.02,'#0f1113'); bx(g,w-.03,w*.56-.03,.042,0,.015,-d/2+.02,'#1a2430'); break;
+    case 'soundbar': bx(g,w,.07,d,0,0,0,'#222'); break;
+    case 'appl': var sm=SM[it.t]||[.2,'#cfd2d4']; bx(g,w,sm[0],d,0,0,0,sm[1]); break;
+    case 'vase': cy(g,w*.45,.35,0,0,0,'#d9c9a8'); cy(g,w*.22,.2,0,.35,0,'#d9c9a8'); break;
+    case 'coatrack':
+      cy(g,w*.4,.02,0,0,0,'#3a2d24'); cy(g,.016,1.75,0,.02,0,'#3a2d24');
+      [0,1,2].forEach(function(k2){var a2=k2*2.1;bx(g,.03,.02,.1,Math.cos(a2)*.04,1.65,Math.sin(a2)*.04,'#3a2d24');}); break;
+    case 'Ldesk':
+      var dt=Math.min(T.at,it.w-20,it.h-20)/100;
+      bx(g,w,.04,dt,0,.7,-d/2+dt/2,'#b98f62'); bx(g,dt,.04,d-dt,w/2-dt/2,.7,-d/2+dt+(d-dt)/2,'#b98f62');
+      [[-w/2+.05,-d/2+.05],[w/2-.05,-d/2+.05],[w/2-.05,d/2-.05],[-w/2+.05,-d/2+dt-.05]].forEach(function(p){bx(g,.05,.7,.05,p[0],0,p[1],'#7a5d3e');}); break;
     case 'planter': bx(g,w,.35,d,0,0,0,'#8a6a48'); bx(g,w-.06,.3,d-.06,0,.3,0,'#5e9a56'); break;
     case 'hedge': bx(g,w,1.2,d,0,0,0,'#4f8a45'); break;
     case 'mirror': bx(g,w,MH[it.t]||.8,Math.min(d,.04),0,0,-d/2+.02,'#cfe3ea'); break;
-    case 'art': var ah=MH[it.t]||.7; bx(g,w,ah,.04,0,0,-d/2+.02,'#7a6a52'); bx(g,w-.08,ah-.08,.045,0,.04,-d/2+.022,'#d9b86a'); break;
+    case 'art': var ah=MH[it.t]||.7,ac=ARTC[it.t]||['#7a6a52','#d9b86a']; bx(g,w,ah,.04,0,0,-d/2+.02,ac[0]); bx(g,w-.08,ah-.08,.045,0,.04,-d/2+.022,ac[1]); break;
     case 'shelf': bx(g,w,.05,d,0,0,0,'#b98f62'); break;
     case 'curtain': bx(g,w,2.3,.06,0,.1,-d/2+.03,'#d9d4c7'); break;
     case 'car':
