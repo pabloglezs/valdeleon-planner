@@ -28,7 +28,7 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.45;
   padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.app{max-width:1480px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.app{max-width:2600px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -39,7 +39,7 @@ h1{margin:0;font-size:24px;font-weight:600;letter-spacing:-.01em;text-wrap:balan
 .facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--mono);font-size:12px;color:var(--ink2)}
 .facts b{color:var(--ink);font-weight:500}
 
-.layout{display:grid;grid-template-columns:minmax(220px,260px) minmax(0,1fr) minmax(220px,270px);gap:16px;align-items:start}
+.layout{display:grid;grid-template-columns:minmax(220px,clamp(240px,15vw,320px)) minmax(0,1fr) minmax(220px,clamp(250px,16vw,330px));gap:16px;align-items:start}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:8px}
 h2{margin:0;font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 
@@ -77,7 +77,7 @@ details.grp[open] summary::after{content:"–"}
 .hint{margin:0;color:var(--ink2);font-size:12px}
 kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--surface)}
 
-.canvas{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:auto;max-height:min(80vh,920px);position:relative}
+.canvas{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:auto;height:clamp(440px,calc(100vh - 235px),1400px);position:relative}
 svg{display:block;user-select:none;-webkit-user-select:none}
 .wall{fill:var(--wall)}
 .floorfill{fill:var(--floor)}
@@ -121,10 +121,13 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 .note{font-size:12px;color:var(--ink2);margin:0}
 
 /* vista 3D */
+.walkopts{display:inline-flex;gap:12px;align-items:center;flex-wrap:wrap}
+.walkopts label{display:inline-flex;gap:6px;align-items:center}
+.walkopts input[type=range]{width:96px;accent-color:var(--accent)}
 .layout.v3d{grid-template-columns:minmax(0,1fr)}
 .layout.v3d .catalog,.layout.v3d .side{display:none}
 .views{display:flex;gap:4px}
-.view3d{position:relative;height:min(76vh,780px);min-height:380px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.view3d{position:relative;height:clamp(420px,calc(100vh - 260px),1400px);border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
 .view3d canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
 .pad{position:absolute;left:12px;bottom:12px;display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(2,46px);gap:6px;touch-action:none;user-select:none;-webkit-user-select:none}
 .pad button{background:color-mix(in srgb,var(--surface) 86%,transparent);border:1px solid var(--line);border-radius:8px;font-size:16px;touch-action:none}
@@ -136,7 +139,7 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 @media (max-width:1040px){
   .layout{grid-template-columns:minmax(0,1fr)}
   .stage{order:1}.side{order:2}.catalog{order:3;position:static;max-height:none}
-  .canvas{max-height:72vh}
+  .canvas{height:72vh}
 }
 @media (prefers-reduced-motion:no-preference){.btn,.add,.tab{transition:background .12s,border-color .12s}}
 </style>
@@ -186,6 +189,10 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
             <button class="btn" data-w="sotano" aria-pressed="false">Sótano</button>
             <button class="btn" data-w="baja" aria-pressed="false">Planta baja</button>
             <button class="btn" data-w="primera" aria-pressed="false">Planta primera</button>
+            <span class="walkopts" id="walkopts" hidden>
+              <label class="hint">Visión <input id="fov" type="range" min="40" max="100" value="55" aria-label="Campo de visión"></label>
+              <label class="hint">Ojos <input id="eye" type="range" min="1.4" max="1.9" step="0.02" value="1.62" aria-label="Altura de los ojos"></label>
+            </span>
           </div>
         </div>
         <div class="view3d" id="view3d">
@@ -596,7 +603,7 @@ function renderInspector(){
 /* ---------- zoom ---------- */
 function fitPPM(){
   var F=FLOORS[S.floor], cw=canvas.clientWidth-2;
-  return Math.max(28,Math.min(96,cw/F.w));
+  return Math.max(28,Math.min(160,cw/F.w));
 }
 function applyZoom(){
   var F=FLOORS[S.floor];
@@ -720,7 +727,7 @@ $('#catalog').addEventListener('click',function(e){
 });
 
 /* ---------- vista 3D (three.js; unidades del mundo = metros) ---------- */
-var V3={ready:false,vis:{sotano:false,baja:true,primera:true},roof:false,mode:'orbit',wf:'baja',yaw:0,pitch:0,px:0,pz:0,keys:{},raf:0,last:0,look:null,visO:null,roofO:false,orbitPos:null,orbitTgt:null,floorG:{},roofM:{},wm:'cut',walls:{},lv:'baja',cy:0,tcy:0,steps:[],holes:{},stairG:[]};
+var V3={ready:false,vis:{sotano:false,baja:true,primera:true},roof:false,mode:'orbit',wf:'baja',yaw:0,pitch:0,px:0,pz:0,keys:{},raf:0,last:0,look:null,visO:null,roofO:false,orbitPos:null,orbitTgt:null,hfov:55,eye:1.62,floorG:{},roofM:{},wm:'cut',walls:{},lv:'baja',cy:0,tcy:0,steps:[],holes:{},stairG:[]};
 var ELEV={sotano:-280,baja:0,primera:280}, WH=260, SLAB=20;
 var ORG={sotano:[20,271],baja:[265,285],primera:[30,270]};      /* esquina del muro exterior en cada plano, cm */
 var NEXT={sotano:'baja',baja:'primera',primera:null};
@@ -1325,7 +1332,7 @@ function sync3DUI(){
   document.querySelectorAll('[data-wm]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-wm')===V3.wm);});
   $('#m-orbit').setAttribute('aria-pressed',V3.mode==='orbit');
   document.querySelectorAll('[data-w]').forEach(function(b){b.setAttribute('aria-pressed',V3.mode==='walk'&&V3.wf===b.getAttribute('data-w'));});
-  ELM.pad.hidden=V3.mode!=='walk';
+  ELM.pad.hidden=V3.mode!=='walk'; $('#walkopts').hidden=V3.mode!=='walk';
   ELM.tip.textContent=V3.mode==='walk'
     ?'Arrastra para mirar. W A S D o flechas para andar, Mayús corre. Las escaleras se suben andando.'
     :'Arrastra para girar, rueda o pellizco para acercar, clic derecho o dos dedos para desplazar.';
@@ -1371,7 +1378,7 @@ function stepWalk(dt){
     if(g2!==null){V3.pz=nz;V3.tcy=g2;}
   }
   V3.cy+=(V3.tcy-V3.cy)*Math.min(1,dt*14);
-  camera.position.set(V3.px,V3.cy+1.62,V3.pz);
+  camera.position.set(V3.px,V3.cy+V3.eye,V3.pz);
   camera.rotation.set(V3.pitch,V3.yaw,0,'YXZ');
 }
 function loop(t){
@@ -1381,10 +1388,16 @@ function loop(t){
   if(V3.wm==='cut'&&V3.mode==='orbit') applyWalls(false);
   renderer.render(scene,camera);
 }
+/* el control es el campo de visión horizontal; el vertical se calcula con la proporción del lienzo */
+function applyFov(){
+  var a=camera.aspect||1;
+  camera.fov=2*Math.atan(Math.tan(V3.hfov*Math.PI/360)/a)*180/Math.PI; camera.updateProjectionMatrix();
+}
 function size3D(){
   if(!renderer) return;
   var w=ELM.view.clientWidth,h=ELM.view.clientHeight; if(!w||!h) return;
   renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+  if(V3.mode==='walk') applyFov();
 }
 function setMode(mode,f){
   if(mode==='walk'){
@@ -1392,7 +1405,7 @@ function setMode(mode,f){
     V3.mode='walk'; V3.wf=f; V3.lv=f; V3.cy=V3.tcy=ELEV[f]/100; controls.enabled=false;
     V3.vis={sotano:true,baja:true,primera:true}; V3.roof=true;
     V3.px=spawnX(f)-oxOf(f)/100; V3.pz=SPAWN[f][1]-ORG[f][1]/100; V3.yaw=0; V3.pitch=0;
-    camera.fov=72; camera.updateProjectionMatrix();
+    applyFov();
   } else {
     if(V3.mode==='walk'&&V3.visO){V3.vis=V3.visO;V3.roof=V3.roofO;}
     V3.mode='orbit'; controls.enabled=true; camera.fov=50; camera.updateProjectionMatrix();
@@ -1463,6 +1476,8 @@ $('#t3d').addEventListener('click',function(e){
   var b=e.target.closest('[data-f]');if(!b)return;var f=b.getAttribute('data-f');V3.vis[f]=!V3.vis[f];applyVis();
 });
 $('#roof').addEventListener('click',function(){V3.roof=!V3.roof;applyVis();});
+$('#fov').addEventListener('input',function(){V3.hfov=+this.value;if(V3.mode==='walk')applyFov();});
+$('#eye').addEventListener('input',function(){V3.eye=+this.value;});
 $('#wm').addEventListener('click',function(e){var b=e.target.closest('[data-wm]');if(!b)return;V3.wm=b.getAttribute('data-wm');applyWalls(true);sync3DUI();});
 $('#m-orbit').addEventListener('click',function(){if(V3.mode!=='orbit')setMode('orbit');});
 document.querySelectorAll('[data-w]').forEach(function(b){b.addEventListener('click',function(){setMode('walk',b.getAttribute('data-w'));});});
