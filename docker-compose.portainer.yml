@@ -1,0 +1,33 @@
+# Stack para pegar en el editor web de Portainer (Stacks > Add stack > Web editor).
+# Requiere que la imagen "chalet98:latest" ya exista en ese entorno: en Portainer,
+# Images > Build a new image > Upload con un .tar.gz que contenga Dockerfile, nginx.conf e index.html
+# (para despliegue continuo desde Git usa docker-compose.yml).
+#
+# PORT es obligatorio: puerto del servidor por el que se publica la web.
+# Defínelo en "Environment variables" del stack (por ejemplo PORT=8123) y apunta
+# Nginx Proxy Manager a IP-DEL-SERVIDOR:PORT.
+services:
+  chalet98:
+    image: chalet98:latest
+    pull_policy: never
+    container_name: chalet98
+    restart: unless-stopped
+    ports:
+      - "${PORT:?Define PORT en Environment variables}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    # Alternativa sin publicar puerto: une el contenedor a la red de Nginx Proxy Manager,
+    # borra el bloque "ports" de arriba y en NPM usa el host "chalet98" y el puerto 8080.
+    # Cambia "npm_default" por el nombre real de esa red (Portainer > Networks).
+    # networks: [npm]
+
+# networks:
+#   npm:
+#     external: true
+#     name: npm_default

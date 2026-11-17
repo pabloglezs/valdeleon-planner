@@ -1,0 +1,31 @@
+# Stack para Portainer. Variables opcionales (Portainer > Stacks > Environment variables):
+#   PORT   (obligatorio) puerto del host donde se publica la web; apunta Nginx Proxy Manager a IP:PORT
+services:
+  chalet98:
+    build: .
+    image: chalet98:latest
+    container_name: chalet98
+    restart: unless-stopped
+    ports:
+      - "${PORT:?Define PORT en Environment variables}:8080"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+    # Si usas un proxy inverso con Traefik, quita "ports" y descomenta esto
+    # (cambia el dominio y el nombre de la red/entrypoints por los tuyos):
+    # networks: [proxy]
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.routers.chalet98.rule=Host(`casa.tudominio.es`)
+    #   - traefik.http.routers.chalet98.entrypoints=websecure
+    #   - traefik.http.routers.chalet98.tls.certresolver=letsencrypt
+    #   - traefik.http.services.chalet98.loadbalancer.server.port=8080
+
+# networks:
+#   proxy:
+#     external: true

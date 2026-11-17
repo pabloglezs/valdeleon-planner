@@ -1,0 +1,6 @@
+.git
+.github
+src
+README.md
+docker-compose*.yml
+*.tar.gz
