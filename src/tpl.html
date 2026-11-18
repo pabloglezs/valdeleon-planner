@@ -36,8 +36,6 @@ button{cursor:pointer}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 24px}
 h1{margin:0;font-size:24px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
 .sub{margin:2px 0 0;color:var(--ink2);font-size:13px}
-.facts{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--mono);font-size:12px;color:var(--ink2)}
-.facts b{color:var(--ink);font-weight:500}
 
 .layout{display:grid;grid-template-columns:minmax(220px,clamp(240px,15vw,320px)) minmax(0,1fr) minmax(220px,clamp(250px,16vw,330px));gap:16px;align-items:start}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:8px}
@@ -61,11 +59,43 @@ details.grp[open] summary::after{content:"–"}
 
 /* escenario */
 .stage{display:flex;flex-direction:column;gap:10px;min-width:0}
-.bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+select.selbtn{max-width:100%}
+.topbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.ctx{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;flex:1 1 360px;min-width:0}
+.ctx[hidden]{display:none}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);flex-wrap:wrap}
+.seg .btn{border:0;border-radius:0;background:none}
+.seg .btn+.btn{border-left:1px solid var(--line)}
+.seg .btn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.zoom{display:inline-flex}
+.zoom .btn{border-radius:0}
+.zoom .btn:first-child{border-radius:6px 0 0 6px}.zoom .btn:last-child{border-radius:0 6px 6px 0}
+.zoom .btn+.btn{margin-left:-1px}
+.menu{position:relative}
+.menu>summary{list-style:none;cursor:pointer}
+.menu>summary::-webkit-details-marker{display:none}
+.menu>summary::after{content:"▾";font-size:10px;color:var(--muted)}
+.menu[open]>summary{border-color:var(--ink2)}
+.pop{position:absolute;right:0;top:calc(100% + 6px);z-index:30;min-width:210px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:2px}
+.pop .btn{width:100%;justify-content:flex-start;border:0;background:none;padding:7px 8px}
+.pop .btn:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.pop .btn::before{content:"";width:14px;height:14px;border:1.5px solid var(--muted);border-radius:3px;flex:none}
+.pop .btn[aria-pressed="true"]{background:none}
+.pop .btn[aria-pressed="true"]::before{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--surface)}
+.pop.pad2{padding:10px 12px;gap:6px;min-width:260px}
+.pop.pad2 label{display:flex;gap:8px;align-items:center}
+.wbar{justify-content:flex-start;gap:8px 14px}
+.wbar .hint{flex:1 1 220px;min-width:0}
+.wbar .wnote{flex-basis:100%;color:var(--bad)}
+.wnote:empty{display:none}
+details.more>summary{cursor:pointer;font-size:12px;color:var(--ink2)}
+details.more>p{margin-top:6px}
 .tabs{display:flex;gap:4px;flex-wrap:wrap}
 .tab{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:7px 12px;font-weight:500;display:flex;gap:8px;align-items:baseline}
+.seg .tab{border:0;border-radius:0;background:none}
+.seg .tab+.tab{border-left:1px solid var(--line)}
 .tab small{font-family:var(--mono);font-size:11px;color:var(--muted)}
-.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.tab[aria-selected="true"],.seg .tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .tab[aria-selected="true"] small{color:inherit;opacity:.7}
 .tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .btn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 10px;font-size:13px;display:inline-flex;gap:6px;align-items:center}
@@ -121,8 +151,9 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 .note{font-size:12px;color:var(--ink2);margin:0}
 
 /* luz del sol */
-.sunbar{margin:0 0 10px}
-.suncfg{display:inline-flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
+.sunbar{margin:0 0 8px}
+.sunbar .hint#sunread{margin-top:0}
+.suncfg{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
 .suncfg label{display:inline-flex;gap:6px;align-items:center}
 .suncfg input[type=range]{width:150px;accent-color:var(--accent)}
 .suncfg input[type=date]{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:inherit;font-size:13px;color:var(--ink)}
@@ -135,10 +166,11 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 .props{margin:0 0 12px}
 .prow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
-.chips .btn b{font-family:var(--mono);font-weight:500;color:var(--muted)}
-.chips .btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.chips .btn[aria-pressed="true"] b{color:inherit;opacity:.7}
-.pdesc{margin:6px 0 0;font-size:13px;color:var(--ink2);max-width:90ch}
+#t3d{flex-wrap:wrap}
+#props .btn b{font-family:var(--mono);font-weight:500;color:var(--muted)}
+#props .btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#props .btn[aria-pressed="true"] b{color:inherit;opacity:.7}
+.pdesc{margin:4px 0 0;font-size:12px;color:var(--ink2);max-width:90ch}
 /* edición de muros */
 .selbtn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;color:var(--ink)}
 svg.tool-on{cursor:crosshair}
@@ -167,6 +199,17 @@ svg.tool-on .item{pointer-events:none}
   .stage{order:1}.side{order:2}.catalog{order:3;position:static;max-height:none}
   .canvas{height:72vh}
 }
+@media (max-width:600px){
+  h1{font-size:20px}
+  .sub{font-size:12px}
+  #props{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:4px}
+  #props .btn{white-space:nowrap}
+  .prow{flex-wrap:nowrap;overflow:hidden}
+  .seg{flex-wrap:nowrap;max-width:100%}
+  .seg .tab,.seg .btn{padding:7px 9px;font-size:13px;white-space:nowrap}
+  .tab small{display:none}
+  .ctx{flex-basis:100%}
+}
 @media (prefers-reduced-motion:no-preference){.btn,.add,.tab{transition:background .12s,border-color .12s}}
 </style>
 
@@ -174,16 +217,13 @@ svg.tool-on .item{pointer-events:none}
   <header>
     <div>
       <h1>Planificador de chalet esquinero</h1>
-      <p class="sub">Residencial Valdeleón, Valdefresno (León). Muebles a escala sobre el plano de venta del esquinero tipo, en tu orientación o invertido.</p>
-    </div>
-    <div class="facts" aria-label="Datos del plano tipo">
-      <span>Plano tipo</span><span><b>200,83 m²</b> útiles</span><span><b>3</b> plantas</span><span>parcela <b>189,39 m²</b></span><span>patio <b>109,64 m²</b></span>
+      <p class="sub">Residencial Valdeleón, Valdefresno (León) · plano tipo de 200,83 m² útiles en 3 plantas · parcela de 189,39 m²</p>
     </div>
     <button class="btn" id="tmirror" aria-pressed="false" title="Los chalets esquineros se construyen en las dos orientaciones: invierte el plano, con sus muebles, para que coincida con el tuyo">Invertir casa (espejo)</button>
   </header>
 
   <nav class="props" aria-label="Propuestas de decoración">
-    <div class="prow"><span class="hint">Propuestas:</span><span class="chips" id="props"></span></div>
+    <div class="prow"><span class="hint">Propuesta</span><span class="chips" id="props"></span></div>
     <p class="pdesc" id="pdesc"></p>
   </nav>
 
@@ -194,50 +234,68 @@ svg.tool-on .item{pointer-events:none}
     </aside>
 
     <section class="stage">
-      <div class="views" id="views" role="tablist" aria-label="Tipo de vista">
-        <button class="tab" role="tab" data-v="2d" aria-selected="true">Plano 2D</button>
-        <button class="tab" role="tab" data-v="3d" aria-selected="false">Vista 3D</button>
-      </div>
-      <div id="v3d" hidden>
-        <div class="bar" style="margin-bottom:10px">
-          <div class="tools" id="t3d">
-            <button class="btn" data-f="sotano" aria-pressed="false">Sótano</button>
-            <button class="btn" data-f="baja" aria-pressed="true">Planta baja</button>
-            <button class="btn" data-f="primera" aria-pressed="true">Planta primera</button>
-            <button class="btn" id="roof" aria-pressed="false">Techo</button>
-          </div>
-          <div class="tools" id="wm">
-            <span class="hint">Muros:</span>
-            <button class="btn" data-wm="cut" aria-pressed="true" title="Bajan los muros que dan a la cámara, como en los Sims">Recorte</button>
-            <button class="btn" data-wm="full" aria-pressed="false">Completos</button>
-            <button class="btn" data-wm="low" aria-pressed="false">Bajos</button>
-            <button class="btn" data-wm="hidden" aria-pressed="false">Ocultos</button>
-          </div>
+      <div class="topbar">
+        <div class="seg" id="views" role="tablist" aria-label="Tipo de vista">
+          <button class="tab" role="tab" data-v="2d" aria-selected="true">Plano 2D</button>
+          <button class="tab" role="tab" data-v="3d" aria-selected="false">Vista 3D</button>
+        </div>
+        <div class="ctx" id="bar2d">
+          <div class="seg" role="tablist" id="tabs"></div>
           <div class="tools">
-            <button class="btn" id="m-orbit" aria-pressed="true">Vista aérea</button>
-            <span class="sep"></span>
-            <span class="hint">Caminar por:</span>
-            <button class="btn" data-w="sotano" aria-pressed="false">Sótano</button>
-            <button class="btn" data-w="baja" aria-pressed="false">Planta baja</button>
-            <button class="btn" data-w="primera" aria-pressed="false">Planta primera</button>
+            <span class="zoom"><button class="btn" id="zout" aria-label="Alejar">−</button><button class="btn" id="zin" aria-label="Acercar">+</button><button class="btn" id="zfit">Ajustar</button></span>
+            <details class="menu" id="vermenu">
+              <summary class="btn">Opciones</summary>
+              <div class="pop">
+                <button class="btn" id="tsnap" aria-pressed="true" title="Mueve los muebles de 5 en 5 cm">Imán de 5 cm</button>
+                <button class="btn" id="tgrid" aria-pressed="true" title="Una cuadrícula equivale a 1 m">Rejilla de 1 m</button>
+                <button class="btn" id="tdims" aria-pressed="false" title="Muestra las medidas de todos los muebles">Medidas de los muebles</button>
+              </div>
+            </details>
+          </div>
+        </div>
+        <div class="ctx" id="bar3d" hidden>
+          <div class="tools">
+            <span class="hint">Mostrar</span>
+            <span class="chips" id="t3d">
+              <button class="btn" data-f="sotano" aria-pressed="false">Sótano</button>
+              <button class="btn" data-f="baja" aria-pressed="true">Planta baja</button>
+              <button class="btn" data-f="primera" aria-pressed="true">Planta primera</button>
+              <button class="btn" id="roof" aria-pressed="false">Techo</button>
+            </span>
+            <label class="hint">Muros
+              <select id="wm" class="selbtn" aria-label="Qué hacer con los muros">
+                <option value="cut">Recorte (como en los Sims)</option><option value="full">Completos</option><option value="low">Bajos</option><option value="hidden">Ocultos</option>
+              </select>
+            </label>
+            <label class="hint">Cámara
+              <select id="cam" class="selbtn" aria-label="Tipo de cámara">
+                <option value="orbit">Vista aérea</option><option value="sotano">Caminar por el sótano</option><option value="baja">Caminar por la planta baja</option><option value="primera">Caminar por la planta primera</option>
+              </select>
+            </label>
             <span class="walkopts" id="walkopts" hidden>
               <label class="hint">Visión <input id="fov" type="range" min="40" max="100" value="55" aria-label="Campo de visión"></label>
               <label class="hint">Ojos <input id="eye" type="range" min="1.4" max="1.9" step="0.02" value="1.62" aria-label="Altura de los ojos"></label>
             </span>
           </div>
+          <button class="btn" id="sunbtn" aria-pressed="false" title="Simula la luz y las sombras del sol en la parcela (42,5898 N, 5,5304 O)">Luz del sol</button>
         </div>
+      </div>
+      <div id="v3d" hidden>
         <div class="sunbar" id="sunbar">
-          <div class="tools">
-            <button class="btn" id="sunbtn" aria-pressed="false" title="Simula la luz y las sombras del sol en la parcela (42,5898 N, 5,5304 O)">Luz del sol</button>
-            <span class="suncfg" id="suncfg" hidden>
-              <label class="hint">Día <input type="date" id="sundate" aria-label="Día del año"></label>
-              <select id="sunpre" class="selbtn" aria-label="Fecha destacada">
-                <option value="">Otro día</option><option value="today">Hoy</option><option value="03-20">Equinoccio de primavera</option><option value="06-21">Solsticio de verano</option><option value="09-23">Equinoccio de otoño</option><option value="12-21">Solsticio de invierno</option>
-              </select>
-              <label class="hint sunh">Hora <input type="range" id="suntime" min="0" max="1439" step="5" value="720" aria-label="Hora del día"><b id="sunhh">12:00</b></label>
-              <button class="btn" id="sunplay" aria-pressed="false">Animar el día</button>
-              <label class="hint" title="0° = el norte está arriba en el plano 2D. Cambia el valor si tu parcela está girada">Giro del plano <input type="range" id="sunnorth" min="-180" max="180" step="5" value="0" aria-label="Giro del plano respecto al norte"><b id="sunnv">0°</b></label>
-            </span>
+          <div class="suncfg" id="suncfg" hidden>
+            <label class="hint">Día <input type="date" id="sundate" aria-label="Día del año"></label>
+            <select id="sunpre" class="selbtn" aria-label="Fecha destacada">
+              <option value="">Fechas clave…</option><option value="today">Hoy</option><option value="03-20">Equinoccio de primavera</option><option value="06-21">Solsticio de verano</option><option value="09-23">Equinoccio de otoño</option><option value="12-21">Solsticio de invierno</option>
+            </select>
+            <label class="hint sunh">Hora <input type="range" id="suntime" min="0" max="1439" step="5" value="720" aria-label="Hora del día"><b id="sunhh">12:00</b></label>
+            <button class="btn" id="sunplay" aria-pressed="false">Animar</button>
+            <details class="menu" id="sunmenu">
+              <summary class="btn">Orientación</summary>
+              <div class="pop pad2">
+                <label class="hint" title="0° = el norte está arriba en el plano 2D. Cambia el valor si tu parcela está girada">Giro del plano <input type="range" id="sunnorth" min="-180" max="180" step="5" value="0" aria-label="Giro del plano respecto al norte"><b id="sunnv">0°</b></label>
+                <span class="hint">0° = el norte está arriba en el plano 2D.</span>
+              </div>
+            </details>
           </div>
           <p class="hint" id="sunread" hidden></p>
         </div>
@@ -249,33 +307,24 @@ svg.tool-on .item{pointer-events:none}
           </div>
           <div class="tip3d" id="tip3d"></div>
         </div>
-        <p class="note" style="margin-top:8px">Maqueta de volúmenes: los muros salen del plano y los muebles son cajas con sus medidas. Las ventanas llevan marco y cristal, las puertas son huecos con dintel y las escaleras se suben andando. Lo que muevas en el plano 2D se refleja aquí.</p>
+        <p class="note" style="margin-top:8px">Maqueta de volúmenes hecha con el plano; lo que muevas en el 2D se refleja aquí.</p>
       </div>
-      <div class="bar" id="bar2d">
-        <div class="tabs" role="tablist" id="tabs"></div>
-        <div class="tools">
-          <button class="btn" id="zout" aria-label="Alejar">−</button>
-          <button class="btn" id="zin" aria-label="Acercar">+</button>
-          <button class="btn" id="zfit">Ajustar</button>
-          <span class="sep"></span>
-          <button class="btn" id="tsnap" aria-pressed="true" title="Mueve los muebles de 5 en 5 cm">Imán 5 cm</button>
-          <button class="btn" id="tgrid" aria-pressed="true" title="Una cuadrícula equivale a 1 m">Rejilla 1 m</button>
-          <button class="btn" id="tdims" aria-pressed="false" title="Muestra las medidas de todos los muebles">Medidas</button>
+      <div class="tools wbar" id="wtools">
+        <div class="seg" id="toolseg" role="group" aria-label="Herramienta">
+          <button class="btn" data-tool="sel" aria-pressed="true" title="Mover y girar muebles">Muebles</button>
+          <button class="btn" data-tool="cut" aria-pressed="false" title="Arrastra un rectángulo sobre el trozo de muro que quieras quitar">Tirar muro</button>
+          <button class="btn" data-tool="add" aria-pressed="false" title="Arrastra para dibujar un muro nuevo">Construir muro</button>
         </div>
+        <span class="tools" id="wextra" hidden>
+          <select id="wthk" class="selbtn" aria-label="Grosor del muro nuevo">
+            <option value="10">Tabique 10 cm</option><option value="15" selected>Tabique 15 cm</option><option value="25">Muro 25 cm</option><option value="30">Muro 30 cm</option>
+          </select>
+          <button class="btn" id="wundo" title="Deshace el último cambio de muros de esta planta">Deshacer</button>
+          <button class="btn danger" id="wreset" title="Vuelve a los muros del plano en esta planta">Restaurar muros</button>
+        </span>
+        <p class="hint" id="hint2d">Arrastra para mover · <kbd>R</kbd> gira · <kbd>F</kbd> voltea · <kbd>Supr</kbd> elimina · <kbd>Ctrl</kbd>+<kbd>D</kbd> duplica</p>
+        <span class="hint wnote" id="wnote"></span>
       </div>
-      <div class="tools" id="wtools">
-        <span class="hint">Muros:</span>
-        <button class="btn" data-tool="sel" aria-pressed="true">Muebles</button>
-        <button class="btn" data-tool="cut" aria-pressed="false" title="Arrastra un rectángulo sobre el trozo de muro que quieras quitar">Tirar muro</button>
-        <button class="btn" data-tool="add" aria-pressed="false" title="Arrastra para dibujar un muro nuevo">Construir muro</button>
-        <select id="wthk" class="selbtn" aria-label="Grosor del muro nuevo">
-          <option value="10">Tabique 10 cm</option><option value="15" selected>Tabique 15 cm</option><option value="25">Muro 25 cm</option><option value="30">Muro 30 cm</option>
-        </select>
-        <button class="btn" id="wundo" title="Deshace el último cambio de muros de esta planta">Deshacer</button>
-        <button class="btn danger" id="wreset" title="Vuelve a los muros del plano en esta planta">Restaurar muros</button>
-        <span class="hint" id="wnote"></span>
-      </div>
-      <p class="hint" id="hint2d">Arrastra para mover · <kbd>R</kbd> gira 90° · <kbd>F</kbd> voltea ·<kbd>Supr</kbd> elimina · flechas mueven 5 cm · <kbd>Ctrl</kbd>+<kbd>D</kbd> duplica</p>
       <div class="canvas" id="canvas"><svg id="svg" role="img" aria-label="Plano de la planta seleccionada con muebles"></svg></div>
     </section>
 
@@ -291,7 +340,7 @@ svg.tool-on .item{pointer-events:none}
           <button class="btn" id="reset">Volver a la propuesta</button>
           <button class="btn danger" id="clear">Vaciar planta</button>
         </div>
-        <p class="note">Los muros salen del plano de venta (escala 1:125). Puertas, ventanas, sanitarios y cocina de serie no están dibujados y las medidas son aproximadas: mide en la casa antes de encargar muebles.</p>
+        <details class="more"><summary>Sobre las medidas</summary><p class="note">Los muros salen del plano de venta (escala 1:125). Puertas, ventanas, sanitarios y cocina de serie no están dibujados y las medidas son aproximadas: mide en la casa antes de encargar muebles.</p></details>
       </div>
     </aside>
   </div>
@@ -774,7 +823,7 @@ function setTool(t){
   svg.classList.toggle('tool-on',t!=='sel');
   $('#hint2d').innerHTML=t==='cut'?'Arrastra un rectángulo sobre el trozo de muro que quieras tirar · <kbd>Esc</kbd> vuelve a los muebles'
     :t==='add'?'Arrastra para dibujar un muro nuevo, horizontal o vertical, con el grosor elegido · <kbd>Esc</kbd> vuelve a los muebles':HINT0;
-  $('#wnote').textContent=t==='sel'?'':'Ojo: no tires muros portantes ni medianeras sin consultar a un técnico.';
+  $('#wnote').textContent=t==='sel'?'':'Ojo: no tires muros portantes ni medianeras sin consultar a un técnico.'; $('#wextra').hidden=t==='sel';
   ovRefresh();
 }
 document.querySelectorAll('[data-tool]').forEach(function(b){b.addEventListener('click',function(){setTool(b.getAttribute('data-tool'));});});
@@ -1496,9 +1545,7 @@ function ghostRoofs(){
 function sync3DUI(){
   document.querySelectorAll('#t3d [data-f]').forEach(function(b){b.setAttribute('aria-pressed',!!V3.vis[b.getAttribute('data-f')]);});
   $('#roof').setAttribute('aria-pressed',!!V3.roof);
-  document.querySelectorAll('[data-wm]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-wm')===V3.wm);});
-  $('#m-orbit').setAttribute('aria-pressed',V3.mode==='orbit');
-  document.querySelectorAll('[data-w]').forEach(function(b){b.setAttribute('aria-pressed',V3.mode==='walk'&&V3.wf===b.getAttribute('data-w'));});
+  $('#wm').value=V3.wm; $('#cam').value=V3.mode==='walk'?V3.wf:'orbit';
   ELM.pad.hidden=V3.mode!=='walk'; $('#walkopts').hidden=V3.mode!=='walk';
   ELM.tip.textContent=V3.mode==='walk'
     ?'Arrastra para mirar. W A S D o flechas para andar, Mayús corre. Las escaleras se suben andando.'
@@ -1677,7 +1724,7 @@ function readSun(p){
   txt+=' · hora oficial de España.';
   $('#sunread').textContent=txt; $('#sunread').hidden=false;
 }
-function stopPlay(){clearInterval(SUNL.play);SUNL.play=0;$('#sunplay').setAttribute('aria-pressed','false');$('#sunplay').textContent='Animar el día';}
+function stopPlay(){clearInterval(SUNL.play);SUNL.play=0;$('#sunplay').setAttribute('aria-pressed','false');$('#sunplay').textContent='Animar';}
 function syncSunUI(){$('#suntime').value=SUNL.min;$('#sunhh').textContent=hhmm(SUNL.min);$('#sundate').value=SUNL.date;$('#sunnv').textContent=SUNL.north+'°';}
 (function(){
   var n=new Date();SUNL.date=n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);
@@ -1722,7 +1769,7 @@ ELM.pad.addEventListener('pointerdown',function(e){var b=e.target.closest('[data
 function setView(v){
   S.view=v; var is3=v==='3d';
   document.querySelectorAll('#views .tab').forEach(function(b){b.setAttribute('aria-selected',b.getAttribute('data-v')===v);});
-  $('#bar2d').hidden=is3; $('#wtools').hidden=is3; $('#hint2d').hidden=is3; $('#canvas').hidden=is3; $('#v3d').hidden=!is3;
+  $('#bar2d').hidden=is3; $('#bar3d').hidden=!is3; $('#wtools').hidden=is3; $('#hint2d').hidden=is3; $('#canvas').hidden=is3; $('#v3d').hidden=!is3;
   document.querySelector('.layout').classList.toggle('v3d',is3);
   if(is3){
     if(!V3.ready&&!init3D()) return;
@@ -1738,9 +1785,11 @@ $('#t3d').addEventListener('click',function(e){
 $('#roof').addEventListener('click',function(){V3.roof=!V3.roof;applyVis();});
 $('#fov').addEventListener('input',function(){V3.hfov=+this.value;if(V3.mode==='walk')applyFov();});
 $('#eye').addEventListener('input',function(){V3.eye=+this.value;});
-$('#wm').addEventListener('click',function(e){var b=e.target.closest('[data-wm]');if(!b)return;V3.wm=b.getAttribute('data-wm');applyWalls(true);sync3DUI();});
-$('#m-orbit').addEventListener('click',function(){if(V3.mode!=='orbit')setMode('orbit');});
-document.querySelectorAll('[data-w]').forEach(function(b){b.addEventListener('click',function(){setMode('walk',b.getAttribute('data-w'));});});
+$('#wm').addEventListener('change',function(){V3.wm=this.value;applyWalls(true);sync3DUI();});
+$('#cam').addEventListener('change',function(){if(this.value==='orbit'){if(V3.mode!=='orbit')setMode('orbit');}else setMode('walk',this.value);});
+/* menús desplegables: se cierran al pulsar fuera o con Esc */
+document.addEventListener('click',function(e){document.querySelectorAll('details.menu[open]').forEach(function(d){if(!d.contains(e.target))d.open=false;});});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('details.menu[open]').forEach(function(d){d.open=false;});});
 
 $('#tmirror').addEventListener('click',function(){
   var fl=function(it){it.x=Math.round(FLOORS[it.f].w*100)-it.x;it.m=it.m?0:1;it.r=(360-it.r)%360;};
