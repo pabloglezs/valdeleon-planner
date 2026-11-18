@@ -125,6 +125,17 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 .issues li.ok{color:var(--ink2)}
 .note{font-size:12px;color:var(--ink2);margin:0}
 
+/* luz del sol */
+.sunbar{margin:0 0 10px}
+.suncfg{display:inline-flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
+.suncfg label{display:inline-flex;gap:6px;align-items:center}
+.suncfg input[type=range]{width:150px;accent-color:var(--accent)}
+.suncfg input[type=date]{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 7px;font:inherit;font-size:13px;color:var(--ink)}
+.sunh b,#sunnv{font-family:var(--mono);font-weight:500;min-width:40px;color:var(--ink)}
+.compass{position:absolute;left:12px;top:12px;width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--surface) 82%,transparent);border:1px solid var(--line);pointer-events:none}
+.needle{position:absolute;inset:0}
+.needle b{position:absolute;top:2px;left:0;right:0;text-align:center;font:600 11px var(--mono);color:var(--bad)}
+.needle::after{content:'';position:absolute;left:50%;top:17px;bottom:7px;width:2px;margin-left:-1px;background:linear-gradient(var(--bad) 50%,var(--muted) 50%)}
 /* propuestas de decoración */
 .props{margin:0 0 12px}
 .prow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
@@ -222,7 +233,23 @@ svg.tool-on .item{pointer-events:none}
             </span>
           </div>
         </div>
+        <div class="sunbar" id="sunbar">
+          <div class="tools">
+            <button class="btn" id="sunbtn" aria-pressed="false" title="Simula la luz y las sombras del sol en la parcela (42,5898 N, 5,5304 O)">Luz del sol</button>
+            <span class="suncfg" id="suncfg" hidden>
+              <label class="hint">Día <input type="date" id="sundate" aria-label="Día del año"></label>
+              <select id="sunpre" class="selbtn" aria-label="Fecha destacada">
+                <option value="">Otro día</option><option value="today">Hoy</option><option value="03-20">Equinoccio de primavera</option><option value="06-21">Solsticio de verano</option><option value="09-23">Equinoccio de otoño</option><option value="12-21">Solsticio de invierno</option>
+              </select>
+              <label class="hint sunh">Hora <input type="range" id="suntime" min="0" max="1439" step="5" value="720" aria-label="Hora del día"><b id="sunhh">12:00</b></label>
+              <button class="btn" id="sunplay" aria-pressed="false">Animar el día</button>
+              <label class="hint" title="0° = el norte está arriba en el plano 2D. Cambia el valor si tu parcela está girada">Giro del plano <input type="range" id="sunnorth" min="-180" max="180" step="5" value="0" aria-label="Giro del plano respecto al norte"><b id="sunnv">0°</b></label>
+            </span>
+          </div>
+          <p class="hint" id="sunread" hidden></p>
+        </div>
         <div class="view3d" id="view3d">
+          <div class="compass" id="compass" hidden aria-label="Brújula"><div class="needle" id="needle"><b>N</b></div></div>
           <div class="msg3d" id="msg3d" hidden></div>
           <div class="pad" id="pad" hidden>
             <button class="f" data-k="f" aria-label="Avanzar">▲</button><button class="l" data-k="l" aria-label="Izquierda">◀</button><button class="b" data-k="b" aria-label="Retroceder">▼</button><button class="r" data-k="r" aria-label="Derecha">▶</button>
@@ -870,7 +897,7 @@ var ARTC={pizarra:['#8d8d88','#f4f4f0'],corcho:['#7a5d3e','#b98f62'],reloj:['#3a
 var SM={micro:[.28,'#c9cdd0'],cafet:[.35,'#2b2e30'],tost:[.2,'#d6d6d0'],freid:[.32,'#2b2e30'],robot:[.38,'#cfd2d4'],consola:[.06,'#e8e8e8'],router:[.04,'#222'],impr:[.18,'#d9dcdd'],
  altav:[.25,'#2b2e30'],mic:[.3,'#222'],auric:[.25,'#2b2e30'],organiz:[.12,'#8a6a48'],miniPC:[.05,'#222'],sub:[.35,'#2b2e30']};
 var HT={mcentro:.4,mcentro2:.4,mcentroR:.4,banco:.9,puf:.42,escrE:1.05,mesaAux:.5}, HP={aparador:.8,aparador2:.8,estante:1.8,libreria:2,estG:1.8,estG120:1.8,mesita:.5,mesita2:.5,comoda:.8,comoda80:.8,comoda120:.8,comoda150:.8,banqueta:.45,bpie:.45,bici:1,moto:1.1,cobertizo:2.2,arcon:.85,zapatero:1,recibidor:.45,biombo:1.6,cesto:.4,tocador:.75,cajonera:.6};
-var renderer,scene,camera,controls,rootG,ground,sun,mats={},wallCache={};
+var renderer,scene,camera,controls,rootG,ground,sun,hemi,mats={},wallCache={};
 var ELM={view:$('#view3d'),msg:$('#msg3d'),pad:$('#pad'),tip:$('#tip3d')};
 
 var _seed=7;
@@ -1443,6 +1470,7 @@ function build3D(){
     V3.floorG[f]=g; rootG.add(g);
   });
   scene.add(rootG); applyVis(); applyWalls(true);
+  if(SUNL.on) applySun();
 }
 function applyVis(){
   if(ground) ground.visible=!V3.vis.sotano;
@@ -1453,7 +1481,24 @@ function applyVis(){
   });
   if(V3.porch) V3.porch.visible=V3.roof&&V3.vis.baja;
   V3.stairG.forEach(function(st){st.g.visible=!!(V3.vis[st.a]||V3.vis[st.b]);});
+  ghostRoofs();
   sync3DUI();
+}
+/* con el sol activo, un techo oculto sigue proyectando sombra (no se pinta, pero sí corta la luz) */
+function setGhost(g,on){
+  g.traverse(function(o){
+    if(!o.isMesh||Array.isArray(o.material)) return;
+    if(on){if(!o.userData.m0){o.userData.m0=o.material;o.userData.mg=o.userData.mg||(function(){var c=o.material.clone();c.colorWrite=false;c.depthWrite=false;return c;})();o.material=o.userData.mg;}}
+    else if(o.userData.m0){o.material=o.userData.m0;o.userData.m0=null;}
+  });
+}
+function ghostRoofs(){
+  ORDER.forEach(function(f){
+    var g=V3.roofM[f]; if(!g) return;
+    var want=SUNL.on&&!V3.roof&&V3.vis[f]&&!(NEXT[f]&&V3.vis[NEXT[f]]);
+    if(want) g.visible=true; setGhost(g,want);
+  });
+  if(V3.porch){var wp=SUNL.on&&!V3.roof&&V3.vis.baja; if(wp) V3.porch.visible=true; setGhost(V3.porch,wp);}
 }
 function sync3DUI(){
   document.querySelectorAll('#t3d [data-f]').forEach(function(b){b.setAttribute('aria-pressed',!!V3.vis[b.getAttribute('data-f')]);});
@@ -1515,6 +1560,7 @@ function loop(t){
   var dt=Math.min(.05,((t-V3.last)/1000)||0); V3.last=t;
   if(V3.mode==='walk') stepWalk(dt); else controls.update();
   if(V3.wm==='cut'&&V3.mode==='orbit') applyWalls(false);
+  if(SUNL.on) updCompass();
   renderer.render(scene,camera);
 }
 /* el control es el campo de visión horizontal; el vertical se calcula con la proporción del lienzo */
@@ -1550,7 +1596,7 @@ function init3D(){
   renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   ELM.view.insertBefore(renderer.domElement,ELM.view.firstChild);
   scene=new THREE.Scene(); camera=new THREE.PerspectiveCamera(50,1,.05,200);
-  scene.add(new THREE.HemisphereLight(0xffffff,0xe6e1d8,.88));
+  hemi=new THREE.HemisphereLight(0xffffff,0xe6e1d8,.88); scene.add(hemi);
   sun=new THREE.DirectionalLight(0xffffff,.72); sun.position.set(9,17,12); sun.target.position.set(3,0,6);
   sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); sun.shadow.bias=-.0005;
   var sc=sun.shadow.camera; sc.left=-16;sc.right=16;sc.top=16;sc.bottom=-16;sc.near=1;sc.far=60;
@@ -1572,6 +1618,98 @@ function init3D(){
   if(window.ResizeObserver) new ResizeObserver(size3D).observe(ELM.view);
   V3.ready=true; return true;
 }
+/* ---------- luz del sol: posición astronómica en la parcela (42,589835 N, 5,530357 O), hora oficial de España ---------- */
+var LAT=42.589835,LON=-5.530357,RAD=Math.PI/180;
+var SUNL={on:false,min:720,north:0,date:'',play:0,ball:null,dirV:null};
+function clamp01(v){return Math.max(0,Math.min(1,v));}
+function sstep(a,b,v){var t=clamp01((v-a)/(b-a));return t*t*(3-2*t);}
+function sunPos(t){
+  var d=t/864e5-.5+2440588-2451545,M=RAD*(357.5291+.98560028*d),C=RAD*(1.9148*Math.sin(M)+.02*Math.sin(2*M)+.0003*Math.sin(3*M)),L=M+C+RAD*102.9372+Math.PI,e=RAD*23.4397;
+  var dec=Math.asin(Math.sin(L)*Math.sin(e)),ra=Math.atan2(Math.sin(L)*Math.cos(e),Math.cos(L)),H=RAD*(280.16+360.9856235*d)-RAD*(-LON)-ra,phi=RAD*LAT;
+  return {az:Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(phi)-Math.tan(dec)*Math.cos(phi))+Math.PI,   /* desde el norte, hacia el este */
+          alt:Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H))};
+}
+function lastSun(y,m){var d=new Date(Date.UTC(y,m+1,0));return Date.UTC(y,m,d.getUTCDate()-d.getUTCDay(),1);}
+function offMad(y,m,d){var t=Date.UTC(y,m,d,12);return (t>=lastSun(y,2)&&t<lastSun(y,9))?2:1;}
+function sunAt(min){var p=SUNL.date.split('-'),y=+p[0],m=+p[1]-1,d=+p[2];return Date.UTC(y,m,d,0,min)-offMad(y,m,d)*36e5;}
+function hhmm(min){min=Math.round(min);return ('0'+Math.floor(min/60)%24).slice(-2)+':'+('0'+min%60).slice(-2);}
+var PTS=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSO','SO','OSO','O','ONO','NO','NNO'];
+function sunInfo(){
+  var up=-1,dn=-1,i,prev=null;
+  for(i=0;i<1440;i++){var a=sunPos(sunAt(i)).alt>-.833*RAD; if(prev===false&&a&&up<0) up=i; if(prev===true&&!a) dn=i; prev=a;}
+  return {up:up,dn:dn};
+}
+function lerpC(a,b,t){var A=new THREE.Color(a),B=new THREE.Color(b);return A.lerp(B,t);}
+function skySun(alt){
+  var d=alt/RAD,N=['#04070d','#0a1220','#1a2536'],T=['#3f5f8f','#e7a374','#f6cf9b'],D=['#6fa5dc','#b9d6ef','#eaf2f6'],st;
+  if(d<-6) st=N; else if(d<2){var t=sstep(-6,2,d);st=N.map(function(c,i){return '#'+lerpC(c,T[i],t).getHexString();});}
+  else {var u=sstep(2,12,d);st=T.map(function(c,i){return '#'+lerpC(c,D[i],u).getHexString();});}
+  var c=document.createElement('canvas');c.width=2;c.height=256;var x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);
+  g.addColorStop(0,st[0]);g.addColorStop(.6,st[1]);g.addColorStop(1,st[2]);x.fillStyle=g;x.fillRect(0,0,2,256);
+  return new THREE.CanvasTexture(c);
+}
+function setShadowRes(n,ext){
+  var sc=sun.shadow.camera;sc.left=-ext;sc.right=ext;sc.top=ext;sc.bottom=-ext;sc.near=1;sc.far=ext>20?170:60;sc.updateProjectionMatrix();
+  if(sun.shadow.mapSize.x!==n){sun.shadow.mapSize.set(n,n);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null;}}
+}
+function applySun(){
+  if(!V3.ready) return;
+  if(!SUNL.on){
+    sun.position.set(9,17,12); sun.target.position.set(3,0,6); sun.intensity=.72; sun.color.set(0xffffff); setShadowRes(2048,16); sun.shadow.normalBias=0;
+    hemi.intensity=.88; hemi.color.set(0xffffff); hemi.groundColor.set(0xe6e1d8);
+    if(SUNL.ball) SUNL.ball.visible=false;
+    scene.background=skyTex(isDark()); $('#compass').hidden=true; ghostRoofs(); return;
+  }
+  var p=sunPos(sunAt(SUNL.min)),alt=p.alt,az=p.az-SUNL.north*RAD,ca=Math.cos(alt),dir=new THREE.Vector3(Math.sin(az)*ca,Math.sin(alt),-Math.cos(az)*ca);
+  var dg=alt/RAD,k=sstep(-2,8,dg),hi=clamp01(dg/40),T=new THREE.Vector3(3.3,0,5.2);
+  sun.target.position.copy(T); sun.position.copy(T).addScaledVector(dir,90);
+  setShadowRes(renderer.capabilities.maxTextureSize>=4096?4096:2048,30); sun.shadow.normalBias=.04;
+  sun.intensity=1.25*k*(.4+.6*Math.sqrt(hi)); sun.color.copy(lerpC('#ff9d55','#fff3df',sstep(2,30,dg)));
+  var day=sstep(-8,15,dg);
+  hemi.intensity=.2+.4*day; hemi.color.copy(lerpC('#5d73a3','#ffffff',day)); hemi.groundColor.copy(lerpC('#2c2c33','#e6e1d8',day));
+  scene.background=skySun(alt);
+  if(!SUNL.ball){SUNL.ball=new THREE.Mesh(new THREE.SphereGeometry(3.4,20,14),new THREE.MeshBasicMaterial({color:0xfff2cf,fog:false}));scene.add(SUNL.ball);}
+  SUNL.ball.position.copy(dir).multiplyScalar(100).add(T); SUNL.ball.visible=dg>-1;
+  $('#compass').hidden=false; ghostRoofs(); readSun(p);
+}
+function updCompass(){
+  var v=SUNL.dirV||(SUNL.dirV=new THREE.Vector3());camera.getWorldDirection(v);
+  var h=Math.atan2(v.x,-v.z)/RAD;
+  $('#needle').style.transform='rotate('+(-SUNL.north-h)+'deg)';
+}
+function readSun(p){
+  var i=sunInfo(),dg=Math.round(p.alt/RAD),b=((Math.round(p.az/RAD)%360)+360)%360,pt=PTS[Math.round(b/22.5)%16];
+  var txt=dg<0?'El sol está bajo el horizonte':'Altura del sol '+dg+'° · dirección '+b+'° ('+pt+')';
+  if(i.up>=0&&i.dn>=0){var L=i.dn-i.up;txt+=' · amanece a las '+hhmm(i.up)+' y anochece a las '+hhmm(i.dn)+' ('+Math.floor(L/60)+' h '+('0'+L%60).slice(-2)+' min de sol)';}
+  txt+=' · hora oficial de España.';
+  $('#sunread').textContent=txt; $('#sunread').hidden=false;
+}
+function stopPlay(){clearInterval(SUNL.play);SUNL.play=0;$('#sunplay').setAttribute('aria-pressed','false');$('#sunplay').textContent='Animar el día';}
+function syncSunUI(){$('#suntime').value=SUNL.min;$('#sunhh').textContent=hhmm(SUNL.min);$('#sundate').value=SUNL.date;$('#sunnv').textContent=SUNL.north+'°';}
+(function(){
+  var n=new Date();SUNL.date=n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);
+  syncSunUI();
+  $('#sunbtn').addEventListener('click',function(){
+    SUNL.on=!SUNL.on; this.setAttribute('aria-pressed',SUNL.on); $('#suncfg').hidden=!SUNL.on;
+    if(SUNL.on){V3.roof=true; V3.wm='full'; applyVis(); applyWalls(true);}   /* las sombras se ven mejor con la casa entera */
+    else{stopPlay();$('#sunread').hidden=true;}
+    applySun();
+  });
+  $('#suntime').addEventListener('input',function(){SUNL.min=+this.value;$('#sunhh').textContent=hhmm(SUNL.min);applySun();});
+  $('#sundate').addEventListener('change',function(){if(this.value){SUNL.date=this.value;$('#sunpre').value='';applySun();}});
+  $('#sunpre').addEventListener('change',function(){
+    var v=this.value; if(!v) return;
+    var y=SUNL.date.slice(0,4); SUNL.date=v==='today'?(function(){var t=new Date();return t.getFullYear()+'-'+('0'+(t.getMonth()+1)).slice(-2)+'-'+('0'+t.getDate()).slice(-2);})():y+'-'+v;
+    syncSunUI(); applySun();
+  });
+  $('#sunnorth').addEventListener('input',function(){SUNL.north=+this.value;$('#sunnv').textContent=SUNL.north+'°';applySun();});
+  $('#sunplay').addEventListener('click',function(){
+    if(SUNL.play){stopPlay();return;}
+    this.setAttribute('aria-pressed','true'); this.textContent='Pausa';
+    SUNL.play=setInterval(function(){if(S.view!=='3d'||!SUNL.on){stopPlay();return;}SUNL.min=(SUNL.min+10)%1440;syncSunUI();applySun();},110);
+  });
+})();
+
 function showMsg(t){ELM.msg.textContent=t;ELM.msg.hidden=false;}
 
 var KEYMAP={w:'f',arrowup:'f',s:'b',arrowdown:'b',a:'l',arrowleft:'l',d:'r',arrowright:'r'};
