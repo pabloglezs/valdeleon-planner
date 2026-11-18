@@ -168,13 +168,21 @@ def tuck(rows):
     return res
 
 
+# El sótano se amplió 2,4942 m hacia la izquierda con el trastero: las filas del sótano se desplazan
+SOT_DX = 2.4942
+
+
+def place(rows):
+    return [r[:2] + [round(r[2] + SOT_DX, 3)] + r[3:] if r[0] == 'sotano' else r for r in rows]
+
+
 out = []
 for name, desc, sel in PROPS:
     rows = []
     for zn in ZONES if sel is not None else []:
         v = sel.get(zn)
         rows += Z[zn][v] if v in Z.get(zn, {}) else BASEZ[zn]
-    out.append({'n': name, 'd': desc, 'items': tuck(rows) + rads})
+    out.append({'n': name, 'd': desc, 'items': place(tuck(rows)) + rads})
 
 json.dump(out, open(os.path.join(here, 'proposals.json'), 'w', encoding='utf8'), ensure_ascii=False, separators=(',', ':'))
 print('proposals.json:', len(out), 'propuestas;', ', '.join('%s=%d' % (o['n'], len(o['items'])) for o in out))

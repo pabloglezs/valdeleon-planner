@@ -355,10 +355,11 @@ var MASKS={sotano:'__MASK_sotano__',baja:'__MASK_baja__',primera:'__MASK_primera
 
 /* ---------- geometría de cada planta (metros, desde la esquina superior izquierda del recorte) ---------- */
 var FLOORS={
-  sotano:{name:'Sótano',w:7.013,h:10.534,
-    house:[0.2,0.3,6.3,10.2],
-    rooms:[['Garaje','45,73 m²',3.3,7.25],['Vestíbulo','2,90 m²',0.95,7.7],['Distribuidor','8,42 m²',2.0,9.6]],
-    stairs:[[5.5,6.55,0.8,2.45,'Escalera']]},
+  /* el sótano mide 2,4942 m más a la izquierda que el recorte original: ahí está el trastero (SOT_DX) */
+  sotano:{name:'Sótano',w:9.5072,h:10.534,
+    house:[0.2442,0.3,8.75,10.2],
+    rooms:[['Garaje','45,73 m²',5.7942,7.25],['Vestíbulo','2,90 m²',3.4442,7.7],['Distribuidor','8,42 m²',4.4942,9.6],['Trastero','21,15 m²',1.5892,5.2]],
+    stairs:[[7.9942,6.55,0.8,2.45,'Escalera']]},
   baja:{name:'Planta baja y patio',w:9.61,h:20.837,
     house:[2.65,2.85,6.45,10.0],
     lot:[0.1,0.15,9.0,20.45],
@@ -455,7 +456,7 @@ var OPEN_BY_FLOOR={sotano:['gar'],baja:['salon','cocina','ext','luz','plantas'],
 var PROPS=__PROPOSALS__;
 
 /* ---------- estado ---------- */
-var KEY='chalet98.plano.v1', PV=2;   /* PV cambia cuando cambia el conjunto de propuestas: se descartan las guardadas con otro */
+var KEY='chalet98.plano.v1', PV=3, SOT_DX=249;   /* el sótano creció 2,49 m a la izquierda (trastero) al pasar de PV 2 a 3 */   /* PV cambia cuando cambia el conjunto de propuestas: se descartan las guardadas con otro */
 var S={view:'2d',prop:0,store:{},mirror:false,tool:'sel',thk:15,wprev:'',edits:{sotano:[],baja:[],primera:[]},floor:'baja',items:[],sel:null,snap:true,grid:true,dims:false,ppm:0,manualZoom:false,nid:1};
 function uid(){return S.nid++;}
 function itemFromDefault(d){
@@ -472,13 +473,20 @@ function load(){
     var j=JSON.parse(raw); if(!j||!Array.isArray(j.items)) return false;
     S.mirror=!!j.mirror;
     var ok=function(i){return i&&TYPES[i.t]&&FLOORS[i.f];};
-    S.prop=(j.pv===PV&&j.prop>=0&&j.prop<PROPS.length)?(j.prop|0):0; S.store={};
-    S.items=j.pv===PV?j.items.filter(ok):propItems(0);
-    if(j.pv===PV&&j.store) Object.keys(j.store).forEach(function(k){if(k!=S.prop&&PROPS[k]&&Array.isArray(j.store[k])) S.store[k]=j.store[k].filter(ok);});
+    var same=(j.pv===PV||j.pv===2);
+    S.prop=(same&&j.prop>=0&&j.prop<PROPS.length)?(j.prop|0):0; S.store={};
+    S.items=same?j.items.filter(ok):propItems(0);
+    if(same&&j.store) Object.keys(j.store).forEach(function(k){if(k!=S.prop&&PROPS[k]&&Array.isArray(j.store[k])) S.store[k]=j.store[k].filter(ok);});
     var mx=function(m,i){return Math.max(m,i.id||0);};
     S.nid=Math.max(S.items.reduce(mx,0),Object.keys(S.store).reduce(function(m,k){return S.store[k].reduce(mx,m);},0))+1;
     if(j.floor&&FLOORS[j.floor]) S.floor=j.floor;
-    S.snap=j.snap!==false; S.grid=j.grid!==false; S.dims=!!j.dims; S.mirror=!!j.mirror; if(j.edits&&j.edits.baja) S.edits=j.edits; return true;
+    S.snap=j.snap!==false; S.grid=j.grid!==false; S.dims=!!j.dims; S.mirror=!!j.mirror; if(j.edits&&j.edits.baja) S.edits=j.edits;
+    if(j.pv===2){   /* datos del sótano antiguo: se desplazan al nuevo origen (con la casa invertida el reflejo ya lo compensa) */
+      var sh=function(l){l.forEach(function(i){if(i.f==='sotano') i.x+=SOT_DX;});};
+      if(!S.mirror){sh(S.items); Object.keys(S.store).forEach(function(k){sh(S.store[k]);});}
+      (S.edits.sotano||[]).forEach(function(e){e.x0+=SOT_DX;e.x1+=SOT_DX;});
+    }
+    return true;
   }catch(e){return false;}
 }
 var saveT;
@@ -927,13 +935,13 @@ $('#catalog').addEventListener('click',function(e){
 /* ---------- vista 3D (three.js; unidades del mundo = metros) ---------- */
 var V3={ready:false,vis:{sotano:false,baja:true,primera:true},roof:false,mode:'orbit',wf:'baja',yaw:0,pitch:0,px:0,pz:0,keys:{},raf:0,last:0,look:null,visO:null,roofO:false,orbitPos:null,orbitTgt:null,hfov:55,eye:1.62,floorG:{},roofM:{},wm:'cut',walls:{},lv:'baja',cy:0,tcy:0,steps:[],holes:{},stairG:[]};
 var ELEV={sotano:-280,baja:0,primera:280}, WH=260, SLAB=20;
-var ORG={sotano:[20,271],baja:[265,285],primera:[30,270]};      /* esquina del muro exterior en cada plano, cm */
+var ORG={sotano:[269.42,271],baja:[265,285],primera:[30,270]};      /* esquina del muro exterior en cada plano, cm */
 var NEXT={sotano:'baja',baja:'primera',primera:null};
 /* con la casa invertida, el origen de cada planta se alinea por el otro lado (el ancho máximo de la casa es 6,55 m) */
 function oxOf(f){return S.mirror?(FLOORS[f].w-6.55)*100-ORG[f][0]:ORG[f][0];}
 function spawnX(f){return S.mirror?FLOORS[f].w-SPAWN[f][0]:SPAWN[f][0];}
 function mxF(F,x){return S.mirror?F.w-x:x;}
-var SPAWN={sotano:[3.3,7.6],baja:[6.5,12.0],primera:[3.9,8.0]}; /* m en cada plano */
+var SPAWN={sotano:[5.7942,7.6],baja:[6.5,12.0],primera:[3.9,8.0]}; /* m en cada plano */
 var MH={espejo:.8,espejoP:1.7,cuadro:.7,cuadro60:.5,pizarra:.6,corcho:.6,reloj:.3,galeria:.7};
 var LH={lampp:1.35,lamppG:1.55,tripode:1.45,lampm:.2,lampS:.3};
 var ARTC={pizarra:['#8d8d88','#f4f4f0'],corcho:['#7a5d3e','#b98f62'],reloj:['#3a2d24','#f4f1ea']};
@@ -1315,6 +1323,7 @@ function furn3(it){
 
 /* huecos medidos sobre los muros del plano: [eje del muro, centro, ancho, posición del muro, grosor, tipo] (v ventana, p puerta principal, i puerta interior) */
 var OPEN={
+ sotano:[['z',4.85,.9,2.7642,.1,'i']],   /* puerta del garaje al trastero */
  baja:[['x',4.3,1.44,3.0,.3,'d'],['x',7.43,1.46,3.0,.3,'v'],['z',7.84,1.2,2.81,.3,'v'],['x',4.6,1.16,12.69,.3,'v'],['x',7.99,.78,12.69,.3,'v'],['x',6.5,1.0,12.7,.3,'p'],
        ['x',6.63,.82,6.65,.12,'i'],['z',9.8,.84,5.95,.1,'i'],['z',10.6,.82,7.05,.12,'i']],
  primera:[['x',1.985,1.47,2.84,.3,'v'],['x',5.1,1.44,2.84,.3,'v'],['z',7.69,.78,.47,.32,'v'],['x',2.27,1.18,12.53,.32,'b'],['x',5.66,.8,12.53,.32,'v'],
@@ -1495,6 +1504,7 @@ function build3D(){
     g.position.set(-ox,ELEV[f]/100,-oz);
     var holes=(V3.holes[f]||[]).map(function(h){return [h[0]+ox,h[1]+oz,h[2]+ox,h[3]+oz];});
     slabs(g,f,F,P,hx0,hy,hx0+hw,hy+hh,holes);
+    if(f==='baja'){var tm=mirW(-2.45,.02);bx(g,tm[1]-tm[0],.16,10.09,(tm[0]+tm[1])/2+ox,-.2,2.62+oz,P.slab);}   /* techo del trastero del sótano, bajo el jardín */
     if(F.lot){
       var lx0=S.mirror?F.w-(F.lot[0]+F.lot[2]):F.lot[0];
       carve([lx0,F.lot[1],lx0+F.lot[2],F.lot[1]+F.lot[3]],[[hx0,hy,hx0+hw,hy+hh]]).forEach(function(r){   /* bajo la casa no hay parcela: ahí está el forjado y el hueco de la escalera */
