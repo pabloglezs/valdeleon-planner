@@ -425,7 +425,7 @@ var GROUPS=[
   jardinera:['Jardinera 120','Jardinera',120,35,'planter'],jardineraL:['Jardinera larga 200','Jardinera',200,40,'planter'],seto:['Seto 200','Seto',200,50,'hedge'],setoC:['Seto 100','Seto',100,50,'hedge']}},
  {id:'deco',cat:'deco',name:'Decoración y textil',t:{
   cuadro:['Cuadro 100','Cuadro',100,8,'art'],cuadro60:['Cuadro 60','',60,8,'art'],espejo:['Espejo de pared 80','Espejo',80,8,'mirror'],espejoP:['Espejo de pie','Espejo',50,8,'mirror'],
-  repisa:['Repisa 100','Repisa',100,25,'shelf'],cortina:['Cortina 200','Cortina',200,12,'curtain'],cortina300:['Cortina 300','Cortina',300,12,'curtain'],
+  repisa:['Repisa 100','Repisa',100,25,'shelf'],baldaB:['Balda baja 100 (90 cm)','Balda',100,25,'shelf'],baldaA:['Balda alta 100 (180 cm)','Balda',100,25,'shelf'],balda60:['Balda 60 (140 cm)','Balda',60,22,'shelf'],balda150:['Balda 150 (120 cm)','Balda',150,25,'shelf'],balda200:['Balda 200 (160 cm)','Balda',200,25,'shelf'],cortina:['Cortina 200','Cortina',200,12,'curtain'],cortina300:['Cortina 300','Cortina',300,12,'curtain'],
   zapatero:['Zapatero','Zapatero',80,30,'plain'],recibidor:['Banco de entrada','Banco',100,35,'plain'],
   alf120:['Alfombra 120×170','Alfombra',120,170,'rug'],alfpas:['Alfombra de pasillo 80×200','Alfombra',80,200,'rug'],
   reloj:['Reloj de pared','',30,4,'art'],galeria:['Galería de cuadros','Galería',150,8,'art'],biombo:['Biombo 150','Biombo',150,8,'plain'],cesto:['Cesto de mimbre','',40,40,'plain'],
@@ -504,7 +504,7 @@ function fmt(n){return (Math.round(n)/100).toFixed(2).replace('.',',');}
 function isRound(T){return T.k==='round'||T.k==='plant'||T.k==='lamp'||T.k==='pend'||T.k==='ceil'||T.k==='fan'||T.k==='vase'||T.k==='coatrack';}
 var GH={rad:1,rug:1,pend:1,pendl:1,ceil:1,art:1,mirror:1,curtain:1,shelf:1,mat:1,tvw:1,sconce:1,led:1,track:1,fan:1};
 /* altura (m) a la que se apoyan los objetos que van sobre una mesa, un mueble, una encimera o la pared */
-var EL={lampm:.5,lampS:.74,espejo:1,espejoP:.1,cuadro:1.3,cuadro60:1.3,repisa:1.4,pizarra:1.2,corcho:1.2,reloj:1.8,galeria:1.2,tvw55:.8,tvw65:.75,aplique:1.7,neon:1.8,led100:.5,
+var EL={lampm:.5,lampS:.74,espejo:1,espejoP:.1,cuadro:1.3,cuadro60:1.3,repisa:1.4,baldaB:.9,baldaA:1.8,balda60:1.4,balda150:1.2,balda200:1.6,pizarra:1.2,corcho:1.2,reloj:1.8,galeria:1.2,tvw55:.8,tvw65:.75,aplique:1.7,neon:1.8,led100:.5,
  mon24:.74,mon27:.74,monU:.74,monD:.74,mon27E:.74,elev:.74,portatil:.74,portatil13:.74,portatilE:.74,teclado:.74,tecladoM:.74,alfmat:.74,miniPC:.74,flexo:.74,impr:.74,altav:.74,mic:.74,auric:.74,organiz:.74,router:.74,
  tv43:.45,tv55:.45,tv65:.45,barra:.45,consola:.45,micro:.92,cafet:.92,tost:.92,freid:.92,robot:.92,rad50:.12,rad70:.12,rad100:.12,rad120:.12,toallero:.12};
 function ghost(it){return !!GH[TYPES[it.t].k]||(EL[it.t]||0)>=.3;}
@@ -1379,7 +1379,8 @@ function furn3(it){
     case 'hedge': bx(g,w,1.2,d,0,0,0,'#4f8a45'); break;
     case 'mirror': bx(g,w,MH[it.t]||.8,Math.min(d,.04),0,0,-d/2+.02,'#cfe3ea'); break;
     case 'art': var ah=MH[it.t]||.7,ac=ARTC[it.t]||['#7a6a52','#d9b86a']; bx(g,w,ah,.04,0,0,-d/2+.02,ac[0]); bx(g,w-.08,ah-.08,.045,0,.04,-d/2+.022,ac[1]); break;
-    case 'shelf': bx(g,w,.05,d,0,0,0,'#b98f62'); break;
+    case 'shelf': bx(g,w,.04,d,0,0,0,'#b98f62');
+      [-1,1].forEach(function(p){bx(g,.02,.1,d*.8,p*(w/2-.1),-.1,-d*.1,'#4d4a46');}); break;
     case 'curtain': bx(g,w,2.3,.06,0,.1,-d/2+.03,'#d9d4c7'); break;
     case 'car': case 'van': vehicle3(g,it,w,d); break;
     case 'moto': moto3(g,it,w,d); break;
