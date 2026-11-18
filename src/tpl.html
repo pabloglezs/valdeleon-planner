@@ -397,7 +397,7 @@ var GROUPS=[
   c160:['Cama 160','Cama 160',170,210,'bed'],c180:['Cama 180','Cama 180',190,210,'bed'],c200:['Cama 200','Cama 200',210,210,'bed'],litera:['Litera 90','Litera',100,200,'bed'],cuna:['Cuna','Cuna',70,140,'bed'],
   mesita:['Mesita de noche 40','',40,35,'plain'],mesita2:['Mesita de noche 50','',50,40,'plain'],
   comoda80:['Cómoda 80','Cómoda',80,45,'plain'],comoda:['Cómoda 100','Cómoda',100,45,'plain'],comoda120:['Cómoda 120','Cómoda',120,45,'plain'],comoda150:['Cómoda 150','Cómoda',150,45,'plain'],bpie:['Banco pie de cama','Banco',120,40,'plain'],
-  arm100:['Armario 100','Armario',100,60,'ward'],arm120:['Armario 120','Armario',120,60,'ward'],arm150:['Armario 150','Armario',150,60,'ward'],arm200:['Armario 200','Armario',200,60,'ward'],arm250:['Armario 250','Armario',250,60,'ward'],
+  arm100:['Armario 100','Armario',100,60,'ward'],arm120:['Armario 120','Armario',120,60,'ward'],arm150:['Armario 150','Armario',150,60,'ward'],arm180:['Armario 180','Armario',180,60,'ward'],arm200:['Armario 200','Armario',200,60,'ward'],arm250:['Armario 250','Armario',250,60,'ward'],
   escr100:['Escritorio 100','Escritorio',100,50,'table'],escr:['Escritorio 120','Escritorio',120,60,'table'],escr140:['Escritorio 140','Escritorio',140,70,'table'],sillaE:['Silla de escritorio','',50,50,'chair']}},
  {id:'bano',cat:'bano',name:'Baño y lavadero',t:{
   banera150:['Bañera 150','Bañera',150,70,'tub'],banera:['Bañera 170','Bañera',170,70,'tub'],ducha80:['Plato de ducha 80','Ducha',80,80,'shower'],ducha:['Plato de ducha 90×70','Ducha',90,70,'shower'],ducha120:['Plato de ducha 120×80','Ducha',120,80,'shower'],
@@ -455,7 +455,7 @@ var OPEN_BY_FLOOR={sotano:['gar'],baja:['salon','cocina','ext','luz','plantas'],
 var PROPS=__PROPOSALS__;
 
 /* ---------- estado ---------- */
-var KEY='chalet98.plano.v1';
+var KEY='chalet98.plano.v1', PV=2;   /* PV cambia cuando cambia el conjunto de propuestas: se descartan las guardadas con otro */
 var S={view:'2d',prop:0,store:{},mirror:false,tool:'sel',thk:15,wprev:'',edits:{sotano:[],baja:[],primera:[]},floor:'baja',items:[],sel:null,snap:true,grid:true,dims:false,ppm:0,manualZoom:false,nid:1};
 function uid(){return S.nid++;}
 function itemFromDefault(d){
@@ -470,10 +470,11 @@ function load(){
   try{
     var raw=localStorage.getItem(KEY); if(!raw) return false;
     var j=JSON.parse(raw); if(!j||!Array.isArray(j.items)) return false;
+    S.mirror=!!j.mirror;
     var ok=function(i){return i&&TYPES[i.t]&&FLOORS[i.f];};
-    S.prop=(j.prop>=0&&j.prop<PROPS.length)?(j.prop|0):0; S.store={};
-    S.items=j.items.filter(ok);
-    if(j.store) Object.keys(j.store).forEach(function(k){if(k!=S.prop&&PROPS[k]&&Array.isArray(j.store[k])) S.store[k]=j.store[k].filter(ok);});
+    S.prop=(j.pv===PV&&j.prop>=0&&j.prop<PROPS.length)?(j.prop|0):0; S.store={};
+    S.items=j.pv===PV?j.items.filter(ok):propItems(0);
+    if(j.pv===PV&&j.store) Object.keys(j.store).forEach(function(k){if(k!=S.prop&&PROPS[k]&&Array.isArray(j.store[k])) S.store[k]=j.store[k].filter(ok);});
     var mx=function(m,i){return Math.max(m,i.id||0);};
     S.nid=Math.max(S.items.reduce(mx,0),Object.keys(S.store).reduce(function(m,k){return S.store[k].reduce(mx,m);},0))+1;
     if(j.floor&&FLOORS[j.floor]) S.floor=j.floor;
@@ -483,7 +484,7 @@ function load(){
 var saveT;
 function save(){
   clearTimeout(saveT);
-  saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify({items:S.items,prop:S.prop,store:S.store,floor:S.floor,snap:S.snap,grid:S.grid,dims:S.dims,mirror:S.mirror,edits:S.edits}));}catch(e){}},250);
+  saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify({pv:PV,items:S.items,prop:S.prop,store:S.store,floor:S.floor,snap:S.snap,grid:S.grid,dims:S.dims,mirror:S.mirror,edits:S.edits}));}catch(e){}},250);
 }
 
 /* ---------- utilidades ---------- */
@@ -1411,9 +1412,22 @@ function stairDefs(){
   t=(ys0-yn1)/6; for(i=6;i<=11;i++){var z1=ys0-(i-6)*t; D.push(['c',xe0,z1-t,xe1,z1,i*RISE,'N']);}
   D.push(['c',xe0,yn0,xe1,yn1,12*RISE,'']);
   t=(xe0-xw0)/4; for(i=13;i<=16;i++){var x1=xe0-(i-13)*t; D.push(['c',x1-t,yn0,x1,yn1,i*RISE,'W']);}
-  var zs=7.15,zn=3.85,sx0=5.4,sx1=6.1; t=(zs-zn)/16;
+  var zs=7.15,zn=3.85,sx0=5.35,sx1=6.15;   /* igual de ancha que el hueco del forjado, para poder entrar andando */ t=(zs-zn)/16;
   for(i=1;i<=16;i++){var zz=zs-(i-1)*t; D.push(['s',sx0,zz-t,sx1,zz,-2.8+i*RISE,'N']);}
   return D;
+}
+/* barandillas: bordes abiertos de los huecos, sin cerrar el acceso a la escalera ni donde ya hay muro */
+var RAILS0={primera:[[[4.69,4.75],[4.47,4.75],[4.47,7.15],[6.15,7.15]]],baja:[[[5.35,4.75],[5.35,6.3]]]};
+function railing(g,pts,col){
+  var H=.95;
+  for(var i=0;i<pts.length-1;i++){
+    var a=pts[i],b=pts[i+1],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz),n=Math.max(1,Math.round(len/.11)),alongX=Math.abs(dx)>=Math.abs(dz),k,t;
+    bx(g,alongX?len:.05,.04,alongX?.05:len,(a[0]+b[0])/2,H-.04,(a[1]+b[1])/2,col);       /* pasamanos */
+    bx(g,alongX?len:.025,.025,alongX?.025:len,(a[0]+b[0])/2,.45,(a[1]+b[1])/2,col);      /* travesaño */
+    bx(g,alongX?len:.03,.03,alongX?.03:len,(a[0]+b[0])/2,.04,(a[1]+b[1])/2,col);         /* zócalo */
+    for(k=0;k<=n;k++){t=k/n;bx(g,.018,H-.08,.018,a[0]+dx*t,.04,a[1]+dz*t,col);}          /* barrotes */
+  }
+  pts.forEach(function(p){bx(g,.05,H,.05,p[0],0,p[1],col);});  /* montantes */
 }
 var HOLES0={baja:[[5.35,3.85,6.15,6.55]],primera:[[4.69,3.85,6.15,4.75],[4.47,4.75,6.15,7.15]]};
 function mirW(x0,x1){return S.mirror?[6.55-x1,6.55-x0]:[x0,x1];}
@@ -1482,11 +1496,15 @@ function build3D(){
     var holes=(V3.holes[f]||[]).map(function(h){return [h[0]+ox,h[1]+oz,h[2]+ox,h[3]+oz];});
     slabs(g,f,F,P,hx0,hy,hx0+hw,hy+hh,holes);
     if(F.lot){
-      var lm=new THREE.Mesh(new THREE.PlaneGeometry(F.lot[2],F.lot[3]),new THREE.MeshStandardMaterial({map:mkTex('gravel',F.lot[2]/1.1,F.lot[3]/1.1),color:P.dk?0x8a8a8a:0xffffff,roughness:1}));
-      lm.rotation.x=-Math.PI/2; lm.position.set(mxF(F,F.lot[0]+F.lot[2]/2),-.03,F.lot[1]+F.lot[3]/2); lm.receiveShadow=true; g.add(lm);
+      var lx0=S.mirror?F.w-(F.lot[0]+F.lot[2]):F.lot[0];
+      carve([lx0,F.lot[1],lx0+F.lot[2],F.lot[1]+F.lot[3]],[[hx0,hy,hx0+hw,hy+hh]]).forEach(function(r){   /* bajo la casa no hay parcela: ahí está el forjado y el hueco de la escalera */
+        var w=r[2]-r[0],d=r[3]-r[1],lm=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshStandardMaterial({map:mkTex('gravel',w/1.1,d/1.1),color:P.dk?0x8a8a8a:0xffffff,roughness:1}));
+        lm.rotation.x=-Math.PI/2; lm.position.set(r[0]+w/2,-.03,r[1]+d/2); lm.receiveShadow=true; g.add(lm);
+      });
       var pth=new THREE.Mesh(new THREE.PlaneGeometry(1.1,7.65),new THREE.MeshStandardMaterial({map:mkTex('concrete',1.1/1.5,7.65/1.5),color:P.dk?0x9a9a9a:0xffffff,roughness:.9}));
       pth.rotation.x=-Math.PI/2; pth.position.set(mxF(F,6.5),-.015,12.85+7.65/2); pth.receiveShadow=true; g.add(pth);
     }
+    (RAILS0[f]||[]).forEach(function(pl){railing(g,pl.map(function(p){return [mirW(p[0],p[0])[0]+ox,p[1]+oz];}),'#2f3336');});
     var clr=STAIR_CLEAR[f];
     var rects=wallRects(f).filter(function(r){
       var cx=r[0]+r[2]/2,cz=r[1]+r[3]/2;
