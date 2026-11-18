@@ -390,7 +390,8 @@ var GROUPS=[
   chaise:['Sofá con chaise longue','Chaise',280,160,'sofa'],arm:['Butaca','Butaca',80,85,'sofa'],puf:['Puf','Puf',50,50,'round'],
   mcentro:['Mesa de centro 100','M. centro',100,55,'table'],mcentro2:['Mesa de centro 120','M. centro',120,60,'table'],mcentroR:['Mesa de centro redonda','M. centro',80,80,'round'],
   tv150:['Mueble de TV 150','TV',150,40,'tv'],tv:['Mueble de TV 180','TV',180,40,'tv'],tv240:['Mueble de TV 240','TV',240,45,'tv'],
-  aparador:['Aparador 140','Aparador',140,40,'plain'],aparador2:['Aparador 180','Aparador',180,45,'plain'],estante:['Estantería 100','Estantería',100,35,'plain'],libreria:['Librería 200','Librería',200,35,'plain'],
+  aparador:['Aparador 140','Aparador',140,40,'plain'],aparador2:['Aparador 180','Aparador',180,45,'plain'],
+  bajo100:['Mueble bajo con puertas 100','Mueble bajo',100,40,'sideb'],bajo150:['Mueble bajo con puertas 150','Mueble bajo',150,40,'sideb'],bajo200:['Mueble bajo con puertas 200','Mueble bajo',200,45,'sideb'],estante:['Estantería 100','Estantería',100,35,'plain'],libreria:['Librería 200','Librería',200,35,'plain'],
   alf:['Alfombra 200×200','Alfombra',200,200,'rug'],alf160:['Alfombra 160×230','Alfombra',160,230,'rug'],alf2:['Alfombra 200×290','Alfombra',200,290,'rug'],
   mesa120:['Mesa de comedor 120','Mesa',120,80,'table'],mesa140:['Mesa de comedor 140','Mesa',140,80,'table'],mesaC:['Mesa de comedor 160','Mesa',160,90,'table'],mesa200:['Mesa de comedor 200','Mesa',200,100,'table'],
   mesaR:['Mesa redonda 110','Mesa',110,110,'round'],mesaR120:['Mesa redonda 120','Mesa',120,120,'round'],silla:['Silla','Silla',45,45,'chair'],banqueta:['Banco de comedor','Banco',120,38,'plain']}},
@@ -612,6 +613,7 @@ function deco(it,T){
          '<circle class="d" cx="'+(x0+w-ct/2-ct*.2)+'" cy="'+(y0+ct+(h-ct)*.6)+'" r="'+cr+'"/><circle class="d" cx="'+(x0+w-ct/2+ct*.2)+'" cy="'+(y0+ct+(h-ct)*.6)+'" r="'+cr+'"/>'; break;
     case 'chair': s+='<rect class="s" x="'+(x0+3)+'" y="'+y0+'" width="'+(w-6)+'" height="'+Math.max(7,h*.18)+'" rx="3"/>'; break;
     case 'tv': s+='<rect class="s" x="'+(x0+w*.12)+'" y="'+y0+'" width="'+(w*.76)+'" height="5"/>'; break;
+    case 'sideb': var sn=Math.max(2,Math.round(w/50)),sq; for(sq=1;sq<sn;sq++) s+='<path class="d" d="M'+(x0+sq*w/sn)+' '+(y0+3)+'V'+(y0+h-3)+'"/>'; break;
     case 'ward': s+='<path class="d" d="M'+x0+' '+(y0+h)+'L'+(x0+w/2)+' '+(y0+h*.45)+'L'+(x0+w)+' '+(y0+h)+'M'+(x0+w/2)+' '+y0+'V'+(y0+h*.45)+'"/>'; break;
     case 'fridge': s+='<path class="d" d="M'+x0+' '+(y0+h*.3)+'H'+(x0+w)+'"/>'; break;
     case 'counter':
@@ -1281,6 +1283,14 @@ function furn3(it){
     case 'tv':
       bx(g,w,.45,d,0,0,0,'#a98963');
       var sw=Math.min(1.4,w*.75); bx(g,sw,sw*.5625,.04,0,.52,-d/2+.2,'#15181a'); break;
+    case 'sideb':
+      var sl=.15,sh=.45,sm=Math.max(2,Math.round(w/.5)),sdw=w/sm;
+      bx(g,w,sh,d-.02,0,sl,-.01,'#d8cdb8');
+      for(i=0;i<sm;i++){
+        bx(g,sdw-.01,sh-.03,.02,-w/2+(i+.5)*sdw,sl+.015,d/2-.01,'#efe9dd');
+        bx(g,.012,.14,.015,-w/2+i*sdw+(i%2?.05:sdw-.05),sl+sh/2-.07,d/2+.01,'#8d8678');
+      }
+      [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(p){bx(g,.04,sl,.04,p[0]*(w/2-.07),0,p[1]*(d/2-.06),'#5b4a38');}); break;
     case 'ward':
       bx(g,w,2.2,d,0,0,0,'#e8e4dc');
       var nd=Math.max(1,Math.round(w/.5));
