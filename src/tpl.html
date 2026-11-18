@@ -465,6 +465,10 @@ function worldRects(it){
     return {x0:it.x+Math.min(a[0],b[0]),x1:it.x+Math.max(a[0],b[0]),y0:it.y+Math.min(a[1],b[1]),y1:it.y+Math.max(a[1],b[1])};
   });
 }
+/* las sillas y taburetes pueden meterse bajo mesas, escritorios, encimeras e islas (hasta TUCK cm) */
+var TUCK=35;
+function isSeat(i){return TYPES[i.t].k==='chair'||i.t==='taburete';}
+function isTable(i){var T=TYPES[i.t];return T.k==='table'||T.k==='counter'||(T.k==='round'&&i.t.indexOf('mesa')===0);}
 function analyze(){
   var list=cur().filter(function(i){return !ghost(i);}), bad={}, msgs=[], R=list.map(worldRects);
   for(var i=0;i<list.length;i++){
@@ -472,7 +476,10 @@ function analyze(){
     if(R[i].some(function(r){return hitsWall(S.floor,r.x0,r.y0,r.x1,r.y1);})){bad[a.id]=1; msgs.push(TYPES[a.t].n+' toca un muro.');}
     for(var j=i+1;j<list.length;j++){
       var b=list[j];
-      var hit=R[i].some(function(p){return R[j].some(function(q){return p.x0<q.x1-1&&q.x0<p.x1-1&&p.y0<q.y1-1&&q.y0<p.y1-1;});});
+      var tuck=(isSeat(a)&&isTable(b))||(isSeat(b)&&isTable(a));
+      var hit=R[i].some(function(p){return R[j].some(function(q){
+        var ox=Math.min(p.x1,q.x1)-Math.max(p.x0,q.x0),oy=Math.min(p.y1,q.y1)-Math.max(p.y0,q.y0);
+        return ox>1&&oy>1&&!(tuck&&Math.min(ox,oy)<=TUCK);});});
       if(hit){bad[a.id]=1; bad[b.id]=1; msgs.push(TYPES[a.t].n+' choca con '+TYPES[b.t].n.toLowerCase()+'.');}
     }
   }
@@ -605,8 +612,8 @@ function buildSVG(){
 function refresh(){
   if(!itemsG) return;
   svg.classList.toggle('nogrid',!S.grid);
-  var an=analyze(), list=cur(), rugs=list.filter(function(i){return TYPES[i.t].k==='rug';}), rest=list.filter(function(i){return TYPES[i.t].k!=='rug';});
-  itemsG.innerHTML=rugs.concat(rest).map(function(i){return itemSVG(i,an.bad[i.id]);}).join('');
+  var an=analyze(), list=cur(), rugs=list.filter(function(i){return TYPES[i.t].k==='rug';}), rest=list.filter(function(i){return TYPES[i.t].k!=='rug';}), under=rest.filter(isSeat);
+  itemsG.innerHTML=rugs.concat(under,rest.filter(function(i){return !isSeat(i);})).map(function(i){return itemSVG(i,an.bad[i.id]);}).join('');
   var sel=S.sel&&byId(S.sel); ovG.innerHTML=((sel&&sel.f===S.floor)?overlayFor(sel):'')+(S.wprev||'');
   if(S.dims){
     ovG.innerHTML+=rest.filter(function(i){return i.id!==S.sel;}).map(function(i){var B=bbox(i);return '<text class="dim" style="fill:var(--ink2)" x="'+i.x+'" y="'+(i.y+B.h/2+13)+'">'+i.w+'×'+i.h+'</text>';}).join('');

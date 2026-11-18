@@ -169,6 +169,20 @@ EXTRAS = {
  1: [b('tv55', 5.9, 4.6, 90), b('lampp', 3.5, 6.5), b('plantaG', 5.75, 3.4)],
 }
 
+# Las sillas se meten 15 cm bajo la mesa (el giro indica hacia dónde miran)
+PUSH = {0: (0, .15), 90: (-.15, 0), 180: (0, -.15), 270: (.15, 0)}
+
+
+def tuck(rows):
+    res = []
+    for r in rows:
+        if r[1].startswith('silla'):
+            dx, dy = PUSH[r[4]]
+            r = r[:2] + [round(r[2] + dx, 3), round(r[3] + dy, 3)] + r[4:]
+        res.append(r)
+    return res
+
+
 out = []
 for i, (name, desc, sel) in enumerate(PROPS):
     rows = []
@@ -179,7 +193,7 @@ for i, (name, desc, sel) in enumerate(PROPS):
         else:
             rows += Z[zn][v]
     rows += EXTRAS.get(i, [])
-    rows += rads
+    rows = tuck(rows) + rads
     out.append({'n': name, 'd': desc, 'items': rows})
 
 json.dump(out, open(os.path.join(here, 'proposals.json'), 'w', encoding='utf8'), ensure_ascii=False, separators=(',', ':'))
