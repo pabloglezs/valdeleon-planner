@@ -86,6 +86,7 @@ Z['porche'] = {
 Z['dorm3'] = {
  'oficina': [b('escrG', 7.4, 3.6), b('monD', 7.4, 3.5), b('teclado', 7.4, 3.8), b('flexo', 8.0, 3.4), b('sillaErg', 7.4, 4.5, 180), b('c90', 8.3, 5.6),
              b('arm100', 6.7, 6.3, 180), b('estante', 6.4, 4.9, 90)],
+ 'despacho': [b('escrG', 7.4, 3.6), b('monD', 7.4, 3.5), b('teclado', 7.4, 3.8), b('flexo', 8.0, 3.4), b('sillaErg', 7.4, 4.5, 180), b('estante', 6.4, 4.9, 90)],
  'ninos': [b('litera', 8.3, 4.4), b('c80', 6.75, 4.4), b('escr100', 7.9, 6.35), b('sillaE', 7.9, 5.8), b('alf120', 7.55, 4.4), b('cesto', 6.5, 6.2)],
  'invitados': [b('c150', 7.5, 4.4), b('mesita', 6.45, 3.4), b('mesita', 8.55, 3.4), b('lampm', 6.45, 3.4), b('lampm', 8.55, 3.4), b('arm120', 8.1, 6.3, 180),
                b('plantaM', 6.5, 6.3)],
@@ -109,12 +110,12 @@ Z['dorm2'] = {
  'oficina': [p('escrG', 1.9, 3.45), p('monD', 1.9, 3.45), p('teclado', 1.9, 3.75), p('flexo', 2.5, 3.35), p('sillaErg', 2.0, 4.25, 180), p('libreria', 3.3, 4.9, 90),
              p('c80', 1.15, 5.0), p('plantaM', 3.2, 3.35)],
  'ninos': [p('c90', 1.15, 4.3), p('c90', 2.55, 4.3), p('mesita', 1.85, 3.25), p('lampm', 1.85, 3.25), p('alf120', 1.85, 5.2), p('arm150', 1.7, 6.2, 180)],
- 'minimal': [p('c150', 2.05, 4.1), p('mesita', 1.0, 3.3), p('mesita', 3.1, 3.3), p('lampm', 1.0, 3.3), p('lampm', 3.1, 3.3), p('arm120', 1.9, 6.14, 180)],
+ 'minimal': [p('c150', 2.05, 4.1), p('mesita', 1.0, 3.3), p('mesita', 3.1, 3.3), p('lampm', 1.0, 3.3), p('lampm', 3.1, 3.3), p('arm180', 3.18, 4.6, 90)],
  'tu': [p('c135', 1.65, 3.89, 270), p('mesita', 0.82, 4.85, 270), p('lampm', 0.82, 4.85), p('arm120', 1.35, 6.14, 180), p('escr', 3.25, 4.7, 90)],
 }
 Z['dorm1'] = {
  'tu': [p('c135', 5.47, 3.88, 90), p('mesita', 6.32, 4.85, 90), p('lampm', 6.32, 4.85), p('arm120', 5.7, 6.14, 180), p('escr', 3.95, 4.9, 270)],
- 'juegos': [p('c90', 6.0, 4.3), p('escr', 4.3, 3.5), p('sillaE', 4.3, 4.2, 180), p('cesto', 3.9, 6.1), p('alf120', 5.0, 5.1), p('plantaM', 6.2, 6.2)],
+ 'juegos': [p('c90', 6.0, 4.3), p('escr', 4.3, 3.5), p('sillaE', 4.3, 4.2, 180), p('alf120', 5.0, 5.1), p('plantaM', 6.2, 6.2)],
  'minimal': [p('c150', 5.1, 4.1), p('mesita', 4.1, 3.3), p('mesita', 6.1, 3.3), p('lampm', 4.1, 3.3), p('lampm', 6.1, 3.3), p('arm120', 5.5, 6.14, 180)],
  'invitados': [p('c90', 4.4, 4.2), p('c90', 5.9, 4.2), p('mesita', 5.15, 3.25), p('lampm', 5.15, 3.25), p('arm120', 5.5, 6.14, 180), p('plantaM', 6.3, 6.2)],
 }
@@ -147,27 +148,11 @@ BASEZ = {'salon': LIV_BASE, 'comedor': DIN_BASE, 'cocina': keep('cocina'), 'porc
          'dorm2': keep('dorm2'), 'dorm1': keep('dorm1'), 'principal': keep('principal'), 'garaje': keep('garaje')}
 
 PROPS = [
- ('Clásica', 'La distribución base: salón con sofá de 3 plazas y TV, comedor para 4, cocina con mesa, dormitorios dobles y garaje con coche.',
-  {}),
- ('Tu porche y cocina', 'Tu porche con sofá en L y mesa de centro, y tu cocina con mesa de 110×70 y cuatro sillas. El resto, equilibrado y acogedor.',
-  {'porche': 'tu', 'cocina': 'tu', 'salon': None, 'comedor': 'tu', 'dorm3': 'tu', 'patio': 'tu', 'dorm2': 'tu', 'dorm1': 'tu', 'principal': 'tu'}),
- ('Teletrabajo', 'Despachos en el dormitorio 3 y en el dormitorio 2 (con cama de invitados), chaise longue en el salón y cocina con desayunador.',
-  {'salon': 'chaise', 'comedor': 'c140', 'cocina': 'desayunador', 'porche': 'trabajo', 'dorm3': 'oficina', 'dorm2': 'oficina', 'garaje': 'taller'}),
- ('Minimalista', 'Pocos muebles, líneas limpias, TV en la pared, mesa redonda y mucha planta. Dormitorios con camas de 150-160 y mesitas simétricas.',
-  {'salon': 'minimal', 'comedor': 'redonda', 'cocina': 'minimal', 'porche': 'minimal', 'dorm3': 'invitados', 'patio': 'minimal',
-   'dorm2': 'minimal', 'dorm1': 'minimal', 'principal': 'grande', 'garaje': 'taller'}),
- ('Familia con niños', 'Salón grande con TV de 240 y alfombra, mesa de 200 para seis, isla en la cocina, literas, cunas y un patio con huerto y pérgola.',
-  {'salon': 'familia', 'comedor': 'c200', 'cocina': 'isla', 'porche': 'familia', 'dorm3': 'ninos', 'patio': 'familia',
-   'dorm2': 'ninos', 'dorm1': 'juegos', 'principal': 'familia', 'garaje': 'familia'}),
- ('Anfitriones', 'Pensada para recibir: sofá en L en el salón, península con taburetes, mesa para seis en el porche, pérgola con barbacoa y habitaciones para invitados.',
-  {'salon': 'esquina', 'comedor': 'redonda', 'cocina': 'peninsula', 'porche': 'anfitriones', 'dorm3': 'invitados', 'patio': 'anfitriones',
-   'dorm2': 'tu', 'dorm1': 'invitados', 'principal': 'grande', 'garaje': 'furgo'}),
+ ('Mi propuesta', 'Salón-comedor y porche para recibir, cocina con península, despacho en el dormitorio 3, dormitorio principal clásico, dormitorio 1 con escritorio y cama de 90 y dormitorio 2 minimalista con armario de 180.',
+  {'salon': 'esquina', 'comedor': 'redonda', 'porche': 'anfitriones', 'cocina': 'peninsula', 'dorm3': 'despacho',
+   'dorm1': 'juegos', 'dorm2': 'minimal'}),   # el resto (principal, patio, garaje) queda como la distribución base
+ ('Vacía', 'Sin muebles: solo quedan los radiadores del plano, para empezar de cero.', None),
 ]
-
-# En "Tu porche y cocina" el salón usa la base con algún complemento
-EXTRAS = {
- 1: [b('tv55', 5.9, 4.6, 90), b('lampp', 3.5, 6.5), b('plantaG', 5.75, 3.4)],
-}
 
 # Las sillas se meten 15 cm bajo la mesa (el giro indica hacia dónde miran)
 PUSH = {0: (0, .15), 90: (-.15, 0), 180: (0, -.15), 270: (.15, 0)}
@@ -184,17 +169,12 @@ def tuck(rows):
 
 
 out = []
-for i, (name, desc, sel) in enumerate(PROPS):
+for name, desc, sel in PROPS:
     rows = []
-    for zn in ZONES:
-        v = sel.get(zn, 'base' if i == 0 else None)
-        if i == 0 or v is None or zn not in Z or v not in Z[zn]:
-            rows += BASEZ[zn]
-        else:
-            rows += Z[zn][v]
-    rows += EXTRAS.get(i, [])
-    rows = tuck(rows) + rads
-    out.append({'n': name, 'd': desc, 'items': rows})
+    for zn in ZONES if sel is not None else []:
+        v = sel.get(zn)
+        rows += Z[zn][v] if v in Z.get(zn, {}) else BASEZ[zn]
+    out.append({'n': name, 'd': desc, 'items': tuck(rows) + rads})
 
 json.dump(out, open(os.path.join(here, 'proposals.json'), 'w', encoding='utf8'), ensure_ascii=False, separators=(',', ':'))
 print('proposals.json:', len(out), 'propuestas;', ', '.join('%s=%d' % (o['n'], len(o['items'])) for o in out))
