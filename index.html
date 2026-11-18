@@ -391,7 +391,8 @@ var GROUPS=[
   mcentro:['Mesa de centro 100','M. centro',100,55,'table'],mcentro2:['Mesa de centro 120','M. centro',120,60,'table'],mcentroR:['Mesa de centro redonda','M. centro',80,80,'round'],
   tv150:['Mueble de TV 150','TV',150,40,'tv'],tv:['Mueble de TV 180','TV',180,40,'tv'],tv240:['Mueble de TV 240','TV',240,45,'tv'],
   aparador:['Aparador 140','Aparador',140,40,'plain'],aparador2:['Aparador 180','Aparador',180,45,'plain'],
-  bajo100:['Mueble bajo con puertas 100','Mueble bajo',100,40,'sideb'],bajo150:['Mueble bajo con puertas 150','Mueble bajo',150,40,'sideb'],bajo200:['Mueble bajo con puertas 200','Mueble bajo',200,45,'sideb'],estante:['Estantería 100','Estantería',100,35,'plain'],libreria:['Librería 200','Librería',200,35,'plain'],
+  bajo100:['Mueble bajo con puertas 100','Mueble bajo',100,40,'sideb'],bajo150:['Mueble bajo con puertas 150','Mueble bajo',150,40,'sideb'],bajo200:['Mueble bajo con puertas 200','Mueble bajo',200,45,'sideb'],
+  alto80:['Mueble alto con puertas 80','Mueble alto',80,40,'sideb'],alto120:['Mueble alto con puertas 120','Mueble alto',120,40,'sideb'],alto160:['Mueble alto con puertas 160','Mueble alto',160,40,'sideb'],estante:['Estantería 100','Estantería',100,35,'plain'],libreria:['Librería 200','Librería',200,35,'plain'],
   alf:['Alfombra 200×200','Alfombra',200,200,'rug'],alf160:['Alfombra 160×230','Alfombra',160,230,'rug'],alf2:['Alfombra 200×290','Alfombra',200,290,'rug'],
   mesa120:['Mesa de comedor 120','Mesa',120,80,'table'],mesa140:['Mesa de comedor 140','Mesa',140,80,'table'],mesaC:['Mesa de comedor 160','Mesa',160,90,'table'],mesa200:['Mesa de comedor 200','Mesa',200,100,'table'],
   mesaR:['Mesa redonda 110','Mesa',110,110,'round'],mesaR120:['Mesa redonda 120','Mesa',120,120,'round'],silla:['Silla','Silla',45,45,'chair'],banqueta:['Banco de comedor','Banco',120,38,'plain']}},
@@ -1284,11 +1285,11 @@ function furn3(it){
       bx(g,w,.45,d,0,0,0,'#a98963');
       var sw=Math.min(1.4,w*.75); bx(g,sw,sw*.5625,.04,0,.52,-d/2+.2,'#15181a'); break;
     case 'sideb':
-      var sl=.15,sh=.45,sm=Math.max(2,Math.round(w/.5)),sdw=w/sm;
+      var sl=.15,sh=(it.t.indexOf('alto')===0?1.8:.6)-.15,sm=Math.max(2,Math.round(w/.5)),sdw=w/sm;
       bx(g,w,sh,d-.02,0,sl,-.01,'#d8cdb8');
       for(i=0;i<sm;i++){
         bx(g,sdw-.01,sh-.03,.02,-w/2+(i+.5)*sdw,sl+.015,d/2-.01,'#efe9dd');
-        bx(g,.012,.14,.015,-w/2+i*sdw+(i%2?.05:sdw-.05),sl+sh/2-.07,d/2+.01,'#8d8678');
+        bx(g,.012,.14,.015,-w/2+i*sdw+(i%2?.05:sdw-.05),sl+sh*(sh>1?.55:.5)-.07,d/2+.01,'#8d8678');
       }
       [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(function(p){bx(g,.04,sl,.04,p[0]*(w/2-.07),0,p[1]*(d/2-.06),'#5b4a38');}); break;
     case 'ward':
