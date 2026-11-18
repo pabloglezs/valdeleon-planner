@@ -417,7 +417,7 @@ var GROUPS=[
   bbq:['Barbacoa','Barbacoa',100,60,'bbq'],maceta:['Maceta','',40,40,'plant'],arbol:['Árbol o seto','Árbol',120,120,'plant'],
   perg:['Pérgola 3×3 m','Pérgola',300,300,'rug'],perg2:['Pérgola 4×3 m','Pérgola',400,300,'rug'],huerto:['Huerto o jardinera','Huerto',200,100,'rug'],cobertizo:['Cobertizo','Cobertizo',200,200,'plain']}},
  {id:'gar',cat:'gar',name:'Garaje y trastero',t:{
-  cochep:['Coche utilitario','Coche',380,165,'car'],coche:['Coche berlina','Coche',450,185,'car'],suv:['SUV','SUV',480,190,'car'],furg:['Furgoneta','Furgoneta',500,200,'van'],moto:['Moto','Moto',220,80,'moto'],scooter:['Scooter','Scooter',180,70,'moto'],bici:['Bicicleta','Bici',170,60,'bike'],
+  cochep:['Coche utilitario','Coche',380,165,'car'],punto:['Fiat Grande Punto 1.3 JTD (2006)','Punto',404,169,'car'],coche:['Coche berlina','Coche',450,185,'car'],suv:['SUV','SUV',480,190,'car'],furg:['Furgoneta','Furgoneta',500,200,'van'],moto:['Moto','Moto',220,80,'moto'],scooter:['Scooter','Scooter',180,70,'moto'],bici:['Bicicleta','Bici',170,60,'bike'],
   estG120:['Estantería 120','Estantería',120,40,'plain'],estG:['Estantería 200','Estantería',200,40,'plain'],banco:['Banco de trabajo','Banco',150,60,'table'],trast:['Armario trastero','Trastero',100,50,'ward'],arcon:['Arcón congelador','Arcón',100,60,'plain']}},
  {id:'luz',cat:'luz',name:'Iluminación',t:{
   lampp:['Lámpara de pie','Lámpara',35,35,'lamp'],lamppG:['Lámpara de pie grande','Lámpara',50,50,'lamp'],lampm:['Lámpara de mesita','',25,25,'lamp'],
@@ -1145,7 +1145,73 @@ var CARS={
  suv:{c:'#4b5563',r:.36,body:[[-.5,.4],[-.5,1.15],[-.36,1.38],[.12,1.42],[.28,.98],[.5,.86],[.5,.4]],gl:[[-.34,.98],[-.35,1.32],[.11,1.36],[.25,.98]],roof:[-.35,.11,1.33]},
  furg:{c:'#e6e8ea',r:.33,body:[[-.5,.34],[-.5,2],[.2,2],[.34,1.5],[.5,1],[.5,.34]],gl:[[.21,1.9],[.335,1.5],[.335,1.2],[.21,1.2]],roof:null}
 };
+/* Fiat Grande Punto (199) 1.3 JTD de 2006, 5 puertas, gris plata metalizado: 4,03 × 1,69 × 1,49 m, batalla 2,51 m, llantas de 16" */
+function loft(g,stations,mt){
+  var pos=[],idx=[],n=stations[0].pts.length,i,j,m=stations.length;
+  stations.forEach(function(s){s.pts.forEach(function(p){pos.push(s.x,p[0],p[1]);});});
+  for(i=0;i<m-1;i++) for(j=0;j<n;j++){var a=i*n+j,b=i*n+(j+1)%n,c=(i+1)*n+(j+1)%n,e=(i+1)*n+j;idx.push(a,b,c,a,c,e);}
+  [0,m-1].forEach(function(k){   /* tapas: abanico desde el centro de la sección */
+    var cy0=0,cz0=0,base=pos.length/3;
+    stations[k].pts.forEach(function(p){cy0+=p[0]/n;cz0+=p[1]/n;});
+    pos.push(stations[k].x,cy0,cz0);
+    for(j=0;j<n;j++) idx.push(base,k*n+j,k*n+(j+1)%n);
+  });
+  var geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3)); geo.setIndex(idx); geo.computeVertexNormals();
+  var mesh=new THREE.Mesh(geo,mt); mesh.castShadow=true; mesh.receiveShadow=true; g.add(mesh); return mesh;
+}
+function bar3(g,a,b,th,mt){   /* barra entre dos puntos (montantes del techo) */
+  var A=new THREE.Vector3(a[0],a[1],a[2]),B=new THREE.Vector3(b[0],b[1],b[2]),dir=B.clone().sub(A),L=dir.length();
+  var m=new THREE.Mesh(new THREE.BoxGeometry(L,th[0],th[1]),mt); m.position.copy(A.clone().add(B).multiplyScalar(.5));
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(1,0,0),dir.normalize()); m.castShadow=true; g.add(m); return m;
+}
+function punto3(g,w,d){
+  var G=new THREE.Group(),SIL='#cdd2d8',
+      body=new THREE.MeshStandardMaterial({color:SIL,roughness:.36,metalness:.22,side:THREE.DoubleSide}),
+      glass=new THREE.MeshStandardMaterial({color:'#18222b',roughness:.1,metalness:.7,side:THREE.DoubleSide}),
+      trim='#1b1d20',BK='#25282b';
+  function tub(x,top,hw,y0){return {x:x,pts:[[y0,hw*.88],[y0+.2,hw*.985],[top-.12,hw],[top,hw*.82],[top,-hw*.82],[top-.12,-hw],[y0+.2,-hw*.985],[y0,-hw*.88]]};}
+  function cab(x,yb,yt,hb,ht){return {x:x,pts:[[yb,hb],[yt-.03,ht],[yt,ht*.9],[yt,-ht*.9],[yt-.03,-ht],[yb,-hb]]};}
+  /* carrocería inferior: capó corto, línea de cintura alta y portón trasero casi vertical */
+  loft(G,[tub(-2.015,.96,.74,.32),tub(-1.95,1.0,.79,.3),tub(-1.6,1.03,.835,.22),tub(-.9,1.0,.843,.17),tub(0,.99,.843,.15),tub(.9,.96,.84,.15),
+          tub(1.3,.9,.84,.17),tub(1.75,.82,.83,.22),tub(1.93,.74,.8,.3),tub(2.015,.6,.68,.34)],body);
+  /* habitáculo acristalado y techo */
+  var cabS=[cab(.95,.96,.97,.78,.77),cab(.62,.985,1.22,.775,.7),cab(.25,.99,1.4,.77,.63),cab(-.15,.995,1.47,.765,.6),cab(-.75,1,1.465,.765,.6),cab(-1.25,1.02,1.42,.76,.6),cab(-1.65,1.03,1.26,.74,.62),cab(-1.85,1.03,1.06,.72,.68)];
+  loft(G,cabS,glass);
+  var roof=[[.3,1.41,.625],[-.15,1.47,.6],[-.75,1.465,.6],[-1.25,1.42,.6],[-1.5,1.35,.61]].map(function(r){return {x:r[0],pts:[[r[1]-.01,r[2]*.95],[r[1]+.02,r[2]*.88],[r[1]+.02,-r[2]*.88],[r[1]-.01,-r[2]*.95]]};});
+  loft(G,roof,body);
+  /* montantes A, B y C */
+  [-1,1].forEach(function(sz){
+    bar3(G,[.95,.97,sz*.775],[.3,1.42,sz*.63],[.06,.06],body);
+    bar3(G,[-.2,.99,sz*.765],[-.2,1.45,sz*.62],[.07,.07],body);
+    bar3(G,[-1.38,1.0,sz*.76],[-1.5,1.35,sz*.62],[.16,.1],body);
+    /* retrovisores, manillas, juntas de puertas y faldón lateral */
+    bx(G,.1,.09,.12,.66,1.0,sz*.9,SIL).material=body; bx(G,.03,.04,.1,.68,.97,sz*.82,BK);
+    [.58,-.18,-1.2].forEach(function(x){bx(G,.008,.62,.006,x,.3,sz*.846,'#3a3d41');});
+    [.15,-.9].forEach(function(x){bx(G,.12,.022,.012,x,.9,sz*.848,BK);});
+    bx(G,2.5,.07,.02,-.1,.22,sz*.835,trim);
+  });
+  /* frontal: faros envolventes, calandra baja con el logotipo y antiniebla */
+  var lamp=new THREE.MeshStandardMaterial({color:'#eef2f5',emissive:'#d8e4ee',emissiveIntensity:.35,roughness:.15,metalness:.2});
+  [-1,1].forEach(function(sz){
+    var l=bx(G,.16,.13,.4,1.9,.65,sz*.55,'#eef2f5'); l.material=lamp; l.rotation.y=-sz*.4;
+    cy(G,.04,.02,2.0,.37,sz*.5,'#303338').rotation.z=Math.PI/2;
+    emis(G,.03,.08,.2,-2.03,.85,sz*.62,'#c8141b');      /* pilotos traseros altos */
+    emis(G,.03,.22,.12,-2.03,.98,sz*.66,'#c8141b');
+  });
+  bx(G,.05,.1,1.0,2.005,.4,0,trim); bx(G,.05,.07,.6,2.0,.56,0,'#2a2d31'); cy(G,.035,.012,2.015,.56,0,'#d9dde1').rotation.z=Math.PI/2;
+  bx(G,.012,.11,.52,2.03,.28,0,'#f2f2ec'); bx(G,.012,.11,.52,-2.03,.74,0,'#f2f2ec'); bx(G,.05,.16,1.4,-2.0,.36,0,BK);
+  /* ruedas 195/55 R16 con llanta de aleación de 5 radios y pasos de rueda */
+  [[1.165,1],[1.165,-1],[-1.345,1],[-1.345,-1]].forEach(function(w4){
+    var x=w4[0],sz=w4[1],z=sz*.78;
+    cy(G,.355,.012,x,.31-.006,sz*.846,'#0e0f10',true);
+    cy(G,.31,.195,x,.31-.0975,z,'#17181a',true); cy(G,.205,.2,x,.31-.1,z,'#c7ccd1',true); cy(G,.06,.21,x,.31-.105,z,'#8e949a',true);
+    for(var k=0;k<5;k++){var a=k*Math.PI*2/5+.3,sp=bx(G,.17,.032,.01,x,0,sz*.882,'#dfe3e6');sp.position.set(x+Math.cos(a)*.1,.31+Math.sin(a)*.1,sz*.882);sp.rotation.z=a;}
+  });
+  return G;
+}
 function vehicle3(g,it,w,d){
+  if(it.t==='punto'){var pg=punto3(g,w,d);pg.scale.set(w/4.04,1,d/1.69);g.add(pg);return;}
   var C=CARS[it.t]||CARS.coche,L=w,bw=d*.94,fx=.5*L;
   var pm=paint(C.c);
   prism(g,C.body.map(function(p){return [p[0]*L,p[1]];}),bw,C.c,pm);
