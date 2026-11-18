@@ -113,7 +113,7 @@ details.more>p{margin-top:6px}
 kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:var(--surface)}
 
 .canvas{background:var(--surface);border:1px solid var(--line);border-radius:8px;overflow:auto;height:clamp(440px,calc(100vh - 235px),1400px);position:relative}
-svg{display:block;user-select:none;-webkit-user-select:none}
+svg{display:block;margin:0 auto;user-select:none;-webkit-user-select:none}
 .wall{fill:var(--wall)}
 .floorfill{fill:var(--floor)}
 .lot{fill:var(--ground);stroke:var(--muted);stroke-width:2;stroke-dasharray:14 8}
@@ -731,8 +731,9 @@ function renderInspector(){
 
 /* ---------- zoom ---------- */
 function fitPPM(){
-  var F=FLOORS[S.floor], cw=canvas.clientWidth-2;
-  return Math.max(28,Math.min(160,cw/F.w));
+  var F=FLOORS[S.floor], cw=canvas.clientWidth-2, ch=canvas.clientHeight-2, pw=cw/F.w, ph=ch/F.h;
+  /* en pantallas anchas se ve la planta entera sin desplazarse; en móvil se ajusta al ancho */
+  return Math.max(20,Math.min(160,cw<700?pw:Math.min(pw,ph)));
 }
 function applyZoom(){
   var F=FLOORS[S.floor];
@@ -1586,7 +1587,17 @@ function wallAt(f,xcm,ycm){
   if(px<0||py<0||px>=m.w||py>=m.h) return false;
   return m.a[py*m.w+px]>128;
 }
+/* sobre los peldaños se camina libremente (con 4 cm de margen): los muros del plano que bordean la escalera cambian
+   de planta a mitad de la bajada y dejaban al visitante atascado junto a la pared */
+function onStairs(X,Z){
+  var y=V3.cy,r=.04;
+  return [[0,0],[r,r],[r,-r],[-r,r],[-r,-r]].every(function(p){
+    var x=X+p[0],z=Z+p[1];
+    return V3.steps.some(function(s){return x>=s[0]&&x<=s[2]&&z>=s[1]&&z<=s[3]&&Math.abs(s[4]-y)<=.5;});
+  });
+}
 function walkFree(X,Z){
+  if(onStairs(X,Z)) return true;
   var f=V3.lv,cx=X*100+oxOf(f),cy=Z*100+ORG[f][1],r=20;
   if(wallAt(f,cx,cy)) return false;
   for(var a=0;a<8;a++) if(wallAt(f,cx+Math.cos(a*Math.PI/4)*r,cy+Math.sin(a*Math.PI/4)*r)) return false;
@@ -1847,6 +1858,7 @@ toggle('#tgrid','grid'); toggle('#tdims','dims');
 $('#tmirror').setAttribute('aria-pressed',S.mirror);
 buildSVG();
 var rt; window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(!S.manualZoom)applyZoom();},120);});
+if(window.ResizeObserver) new ResizeObserver(function(){if(!S.manualZoom&&S.view==='2d')applyZoom();}).observe(canvas);   /* al terminar de maquetarse la página o cambiar el tamaño del recuadro */
 })();
 </script>
 </body>
