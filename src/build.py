@@ -1,4 +1,4 @@
-"""Genera ../index.html a partir de tpl.html, las máscaras de muros y la distribución inicial.
+"""Genera ../index.html a partir de tpl.html, las máscaras de muros y las propuestas de decoración (proposals.json, que sale de gen_proposals.py).
 
 Uso (desde la raíz del repo):  python src/build.py
 Solo usa la biblioteca estándar de Python.
@@ -12,7 +12,7 @@ s = open(os.path.join(here, 'tpl.html'), encoding='utf8').read()
 for f in ('sotano', 'baja', 'primera'):
     b = base64.b64encode(open(os.path.join(here, f + '_mask.png'), 'rb').read()).decode()
     s = s.replace('__MASK_' + f + '__', 'data:image/png;base64,' + b)
-s = s.replace('__LAYOUT__', open(os.path.join(here, 'layout.json'), encoding='utf8').read())
+s = s.replace('__PROPOSALS__', open(os.path.join(here, 'proposals.json'), encoding='utf8').read())
 s = s.replace('__FAVICON__', 'data:image/png;base64,' + base64.b64encode(open(os.path.join(here, 'favicon.png'), 'rb').read()).decode())
 
 # La plantilla trae solo el contenido; aquí se envuelve en un documento completo

@@ -120,6 +120,14 @@ label.f input{font-family:var(--mono);font-size:14px;text-transform:none;letter-
 .issues li.ok{color:var(--ink2)}
 .note{font-size:12px;color:var(--ink2);margin:0}
 
+/* propuestas de decoración */
+.props{margin:0 0 12px}
+.prow{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips .btn b{font-family:var(--mono);font-weight:500;color:var(--muted)}
+.chips .btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chips .btn[aria-pressed="true"] b{color:inherit;opacity:.7}
+.pdesc{margin:6px 0 0;font-size:13px;color:var(--ink2);max-width:90ch}
 /* edición de muros */
 .selbtn{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;color:var(--ink)}
 svg.tool-on{cursor:crosshair}
@@ -162,6 +170,11 @@ svg.tool-on .item{pointer-events:none}
     </div>
     <button class="btn" id="tmirror" aria-pressed="false" title="Los chalets esquineros se construyen en las dos orientaciones: invierte el plano, con sus muebles, para que coincida con el tuyo">Invertir casa (espejo)</button>
   </header>
+
+  <nav class="props" aria-label="Propuestas de decoración">
+    <div class="prow"><span class="hint">Propuestas:</span><span class="chips" id="props"></span></div>
+    <p class="pdesc" id="pdesc"></p>
+  </nav>
 
   <div class="layout">
     <aside class="panel catalog" aria-label="Catálogo de muebles">
@@ -363,24 +376,30 @@ GROUPS.forEach(function(g){Object.keys(g.t).forEach(function(k){var a=g.t[k];TYP
 var OPEN_BY_FLOOR={sotano:['gar'],baja:['salon','cocina','ext','luz','plantas'],primera:['dorm','bano','luz','ofi']};
 
 /* ---------- propuesta inicial: [planta, tipo, x m, y m, giro] ---------- */
-var DEFAULT=__LAYOUT__;
+var PROPS=__PROPOSALS__;
 
 /* ---------- estado ---------- */
 var KEY='chalet98.plano.v1';
-var S={view:'2d',mirror:false,tool:'sel',thk:15,wprev:'',edits:{sotano:[],baja:[],primera:[]},floor:'baja',items:[],sel:null,snap:true,grid:true,dims:false,ppm:0,manualZoom:false,nid:1};
+var S={view:'2d',prop:0,store:{},mirror:false,tool:'sel',thk:15,wprev:'',edits:{sotano:[],baja:[],primera:[]},floor:'baja',items:[],sel:null,snap:true,grid:true,dims:false,ppm:0,manualZoom:false,nid:1};
 function uid(){return S.nid++;}
 function itemFromDefault(d){
-  var T=TYPES[d[1]],it={id:uid(),f:d[0],t:d[1],x:Math.round(d[2]*100),y:Math.round(d[3]*100),r:d[4],w:T.w,h:T.h};
-  if(S.mirror){it.x=Math.round(FLOORS[it.f].w*100)-it.x;it.m=1;it.r=(360-it.r)%360;}
+  var T=TYPES[d[1]],it={id:uid(),f:d[0],t:d[1],x:Math.round(d[2]*100),y:Math.round(d[3]*100),r:d[4],w:T.w,h:T.h},m=d[5]?1:0;
+  if(S.mirror){it.x=Math.round(FLOORS[it.f].w*100)-it.x;m=m?0:1;it.r=(360-it.r)%360;}
+  if(m) it.m=1;
   return it;
 }
-function defaults(){S.items=DEFAULT.map(itemFromDefault);}
+function propItems(i){return PROPS[i].items.map(itemFromDefault);}
+function defaults(){S.items=propItems(S.prop);}
 function load(){
   try{
     var raw=localStorage.getItem(KEY); if(!raw) return false;
     var j=JSON.parse(raw); if(!j||!Array.isArray(j.items)) return false;
-    S.items=j.items.filter(function(i){return TYPES[i.t]&&FLOORS[i.f];});
-    S.nid=S.items.reduce(function(m,i){return Math.max(m,i.id);},0)+1;
+    var ok=function(i){return i&&TYPES[i.t]&&FLOORS[i.f];};
+    S.prop=(j.prop>=0&&j.prop<PROPS.length)?(j.prop|0):0; S.store={};
+    S.items=j.items.filter(ok);
+    if(j.store) Object.keys(j.store).forEach(function(k){if(k!=S.prop&&PROPS[k]&&Array.isArray(j.store[k])) S.store[k]=j.store[k].filter(ok);});
+    var mx=function(m,i){return Math.max(m,i.id||0);};
+    S.nid=Math.max(S.items.reduce(mx,0),Object.keys(S.store).reduce(function(m,k){return S.store[k].reduce(mx,m);},0))+1;
     if(j.floor&&FLOORS[j.floor]) S.floor=j.floor;
     S.snap=j.snap!==false; S.grid=j.grid!==false; S.dims=!!j.dims; S.mirror=!!j.mirror; if(j.edits&&j.edits.baja) S.edits=j.edits; return true;
   }catch(e){return false;}
@@ -388,7 +407,7 @@ function load(){
 var saveT;
 function save(){
   clearTimeout(saveT);
-  saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify({items:S.items,floor:S.floor,snap:S.snap,grid:S.grid,dims:S.dims,mirror:S.mirror,edits:S.edits}));}catch(e){}},250);
+  saveT=setTimeout(function(){try{localStorage.setItem(KEY,JSON.stringify({items:S.items,prop:S.prop,store:S.store,floor:S.floor,snap:S.snap,grid:S.grid,dims:S.dims,mirror:S.mirror,edits:S.edits}));}catch(e){}},250);
 }
 
 /* ---------- utilidades ---------- */
@@ -446,6 +465,10 @@ function worldRects(it){
     return {x0:it.x+Math.min(a[0],b[0]),x1:it.x+Math.max(a[0],b[0]),y0:it.y+Math.min(a[1],b[1]),y1:it.y+Math.max(a[1],b[1])};
   });
 }
+/* las sillas y taburetes pueden meterse bajo mesas, escritorios, encimeras e islas (hasta TUCK cm) */
+var TUCK=35;
+function isSeat(i){return TYPES[i.t].k==='chair'||i.t==='taburete';}
+function isTable(i){var T=TYPES[i.t];return T.k==='table'||T.k==='counter'||(T.k==='round'&&i.t.indexOf('mesa')===0);}
 function analyze(){
   var list=cur().filter(function(i){return !ghost(i);}), bad={}, msgs=[], R=list.map(worldRects);
   for(var i=0;i<list.length;i++){
@@ -453,7 +476,10 @@ function analyze(){
     if(R[i].some(function(r){return hitsWall(S.floor,r.x0,r.y0,r.x1,r.y1);})){bad[a.id]=1; msgs.push(TYPES[a.t].n+' toca un muro.');}
     for(var j=i+1;j<list.length;j++){
       var b=list[j];
-      var hit=R[i].some(function(p){return R[j].some(function(q){return p.x0<q.x1-1&&q.x0<p.x1-1&&p.y0<q.y1-1&&q.y0<p.y1-1;});});
+      var tuck=(isSeat(a)&&isTable(b))||(isSeat(b)&&isTable(a));
+      var hit=R[i].some(function(p){return R[j].some(function(q){
+        var ox=Math.min(p.x1,q.x1)-Math.max(p.x0,q.x0),oy=Math.min(p.y1,q.y1)-Math.max(p.y0,q.y0);
+        return ox>1&&oy>1&&!(tuck&&Math.min(ox,oy)<=TUCK);});});
       if(hit){bad[a.id]=1; bad[b.id]=1; msgs.push(TYPES[a.t].n+' choca con '+TYPES[b.t].n.toLowerCase()+'.');}
     }
   }
@@ -586,8 +612,8 @@ function buildSVG(){
 function refresh(){
   if(!itemsG) return;
   svg.classList.toggle('nogrid',!S.grid);
-  var an=analyze(), list=cur(), rugs=list.filter(function(i){return TYPES[i.t].k==='rug';}), rest=list.filter(function(i){return TYPES[i.t].k!=='rug';});
-  itemsG.innerHTML=rugs.concat(rest).map(function(i){return itemSVG(i,an.bad[i.id]);}).join('');
+  var an=analyze(), list=cur(), rugs=list.filter(function(i){return TYPES[i.t].k==='rug';}), rest=list.filter(function(i){return TYPES[i.t].k!=='rug';}), under=rest.filter(isSeat);
+  itemsG.innerHTML=rugs.concat(under,rest.filter(function(i){return !isSeat(i);})).map(function(i){return itemSVG(i,an.bad[i.id]);}).join('');
   var sel=S.sel&&byId(S.sel); ovG.innerHTML=((sel&&sel.f===S.floor)?overlayFor(sel):'')+(S.wprev||'');
   if(S.dims){
     ovG.innerHTML+=rest.filter(function(i){return i.id!==S.sel;}).map(function(i){var B=bbox(i);return '<text class="dim" style="fill:var(--ink2)" x="'+i.x+'" y="'+(i.y+B.h/2+13)+'">'+i.w+'×'+i.h+'</text>';}).join('');
@@ -784,7 +810,7 @@ function armed(btn,label,fn){
 }
 armed($('#reset'),'Pulsa otra vez para confirmar',function(){
   var keep=S.items.filter(function(i){return i.f!==S.floor;});
-  var mine=DEFAULT.filter(function(d){return d[0]===S.floor;}).map(itemFromDefault);
+  var mine=PROPS[S.prop].items.filter(function(d){return d[0]===S.floor;}).map(itemFromDefault);
   S.items=keep.concat(mine); S.sel=null; refresh();
 });
 armed($('#clear'),'Pulsa otra vez para vaciar',function(){
@@ -1579,13 +1605,29 @@ $('#m-orbit').addEventListener('click',function(){if(V3.mode!=='orbit')setMode('
 document.querySelectorAll('[data-w]').forEach(function(b){b.addEventListener('click',function(){setMode('walk',b.getAttribute('data-w'));});});
 
 $('#tmirror').addEventListener('click',function(){
-  S.items.forEach(function(it){it.x=Math.round(FLOORS[it.f].w*100)-it.x;it.m=it.m?0:1;it.r=(360-it.r)%360;});
+  var fl=function(it){it.x=Math.round(FLOORS[it.f].w*100)-it.x;it.m=it.m?0:1;it.r=(360-it.r)%360;};
+  S.items.forEach(fl); Object.keys(S.store).forEach(function(k){S.store[k].forEach(fl);});
   S.mirror=!S.mirror; this.setAttribute('aria-pressed',S.mirror);
   if(S.view==='3d'&&V3.ready){build3D(); if(V3.mode==='walk') setMode('walk',V3.wf);}
   buildSVG();
 });
+/* ---------- propuestas de decoración: cada una conserva sus cambios al alternar ---------- */
+function buildProps(){
+  $('#props').innerHTML=PROPS.map(function(p,i){return '<button class="btn" data-p="'+i+'" aria-pressed="'+(i===S.prop)+'" title="'+esc(p.d)+'"><b>'+(i+1)+'</b>'+esc(p.n)+'</button>';}).join('');
+  $('#pdesc').textContent=PROPS[S.prop].d;
+}
+function setProp(i){
+  if(i===S.prop||!PROPS[i]) return;
+  S.store[S.prop]=S.items; S.prop=i; S.items=S.store[i]||propItems(i); delete S.store[i]; S.sel=null;
+  buildProps();
+  if(S.view==='3d'&&V3.ready){build3D(); if(V3.mode==='walk') setMode('walk',V3.wf);}
+  buildSVG(); save();
+}
+$('#props').addEventListener('click',function(e){var b=e.target.closest('[data-p]');if(b)setProp(+b.getAttribute('data-p'));});
+
 /* ---------- arranque ---------- */
 if(!load()) defaults();
+buildProps();
 buildCatalog(); openGroups();
 $('#tsnap').addEventListener('click',function(){S.snap=!S.snap;this.setAttribute('aria-pressed',S.snap);save();});
 $('#tsnap').setAttribute('aria-pressed',S.snap);

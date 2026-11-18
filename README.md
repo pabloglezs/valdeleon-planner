@@ -61,6 +61,14 @@ git add -A && git commit -m "Describe el cambio" && git push
 
 `build.py` solo usa la biblioteca estándar de Python y escribe `index.html` en la raíz.
 
+### Propuestas de decoración
+
+La aplicación trae 6 propuestas que se alternan con los botones de arriba (cada una conserva los cambios que le hagas). Salen de `src/gen_proposals.py`, que combina variantes por zona (salón, cocina, porche, dormitorios, patio, garaje) a partir de `src/layout.json` y escribe `src/proposals.json`. Para retocar una, edita el script y ejecuta:
+
+```bash
+python src/gen_proposals.py && python src/build.py
+```
+
 ## Probar en local
 
 ```bash
